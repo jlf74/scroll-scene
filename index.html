@@ -125,7 +125,8 @@
   .card--d{grid-column:span 2;background:var(--c3);color:var(--ink)}
 
   /* цитата с объёмными знаками: текст стоит на месте с самого начала, меняется только подложка */
-  .quote{position:relative;padding-bottom:28vh}   /* 28vh запаса: раскрытый на весь экран блок держится на месте (sticky) эту долю прокрутки, потом едет дальше (15vh — одна насечка колеса, не замечалось) */
+  .quote{position:relative}
+  .quote__space{height:22vh}   /* распорка: раскрытый на весь экран блок держится на месте (sticky) 22vh прокрутки, потом едет дальше. Именно блок, не padding: sticky не может уйти в отступ родителя */
   .quote__stick{position:sticky;top:0;min-height:calc(100vh + 60px);padding:190px 0 220px;display:flex;flex-direction:column;justify-content:flex-end}   /* снизу запас, чтобы бежевый не обрывался сразу под подписью */
   .quote__bg{position:absolute;z-index:0;background:var(--plate);top:calc(24px * (1 - var(--qk,0)));bottom:calc(24px * (1 - var(--qk,0)));left:calc(max(24px, 50vw - 696px) * (1 - var(--qk,0)));right:calc(max(24px, 50vw - 696px) * (1 - var(--qk,0)));border-radius:calc(40px * (1 - var(--qk,0)))}
   .quote .phrase,.quote .q-foot{position:relative;z-index:1;margin-left:max(88px, calc(50vw - 608px))}
@@ -252,6 +253,7 @@
       <p class="phrase">С помощью эффективной <i class="b rot" data-s="bolt" data-c="c3"></i> рекламы, в&nbsp;которую вложен один миллион <i class="b" data-s="stack3" data-c="c6"></i> долларов, можно продать больше товаров,<i class="b rot2" data-s="box" data-c="c2"></i> чем с помощью неэффективной <i class="b rot" data-s="ring" data-c="c1"></i> рекламы, поглотившей десять миллионов <i class="b rot2" data-s="stack6" data-c="c1"></i> долларов.</p>
       <div class="q-foot"><span>Дэвид Огилви</span><b>*Мы знаем, как это сделать!</b></div>
     </div>
+    <div class="quote__space"></div>
   </section>
 
   <section class="tail" id="pjourney">
