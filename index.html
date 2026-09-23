@@ -125,7 +125,8 @@
   .card--d{grid-column:span 2;background:var(--c3);color:var(--ink)}
 
   /* цитата с объёмными знаками: текст стоит на месте с самого начала, меняется только подложка */
-  .quote{position:relative;min-height:calc(100vh + 60px);padding:190px 0 220px;display:flex;flex-direction:column;justify-content:flex-end}   /* снизу запас, чтобы бежевый не обрывался сразу под подписью */
+  .quote{position:relative;padding-bottom:15vh}   /* 15vh запаса: раскрытый на весь экран блок держится на месте (sticky) эту долю прокрутки, потом едет дальше */
+  .quote__stick{position:sticky;top:0;min-height:calc(100vh + 60px);padding:190px 0 220px;display:flex;flex-direction:column;justify-content:flex-end}   /* снизу запас, чтобы бежевый не обрывался сразу под подписью */
   .quote__bg{position:absolute;z-index:0;background:var(--plate);top:calc(24px * (1 - var(--qk,0)));bottom:calc(24px * (1 - var(--qk,0)));left:calc(max(24px, 50vw - 696px) * (1 - var(--qk,0)));right:calc(max(24px, 50vw - 696px) * (1 - var(--qk,0)));border-radius:calc(40px * (1 - var(--qk,0)))}
   .quote .phrase,.quote .q-foot{position:relative;z-index:1;margin-left:max(88px, calc(50vw - 608px))}
   .phrase{font-family:'Unbounded',sans-serif;font-weight:800;letter-spacing:-.04em;line-height:1.12;font-size:54px;max-width:1240px;text-wrap:balance}
@@ -246,9 +247,11 @@
 
 
   <section class="quote">
+    <div class="quote__stick">
     <div class="quote__bg"></div>
       <p class="phrase">С помощью эффективной <i class="b rot" data-s="bolt" data-c="c3"></i> рекламы, в&nbsp;которую вложен один миллион <i class="b" data-s="stack3" data-c="c6"></i> долларов, можно продать больше товаров,<i class="b rot2" data-s="box" data-c="c2"></i> чем с помощью неэффективной <i class="b rot" data-s="ring" data-c="c1"></i> рекламы, поглотившей десять миллионов <i class="b rot2" data-s="stack6" data-c="c1"></i> долларов.</p>
       <div class="q-foot"><span>Дэвид Огилви</span><b>*Мы знаем, как это сделать!</b></div>
+    </div>
   </section>
 
   <section class="tail" id="pjourney">
@@ -547,7 +550,7 @@ plate.addEventListener('pointerleave', () => { target.x = 0; target.y = 0; });
 const UNFOLD_END = 0.22;                      // камера и шар опускаются за эту долю прокрутки; дуги раскрываются по очереди до 0.42
 const CAM_BACK = 8;                          // камера за шаром
 const BALL_Z0 = 8, BALL_Z1 = PZ - 2 - CAM_BACK; // камера заканчивает путь под синими воротами
-const quoteEl = document.querySelector('.quote'), ctEl = document.querySelector('.ct');
+const quoteEl = document.querySelector('.quote'), quoteStick = document.querySelector('.quote__stick'), ctEl = document.querySelector('.ct');
 const clock = new THREE.Clock(); let t = 0, toWhiteNow = 0, waveNow = 0;
 const fpsEl = document.getElementById('fps'); let fpsN = 0, fpsT = 0;
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -689,7 +692,7 @@ function frame() {
   heroT.style.opacity = heroF.style.opacity = String(fade);
 
   pageEl.classList.toggle('onwhite', ctEl.getBoundingClientRect().top < 84);
-  const qr = quoteEl.getBoundingClientRect();
+  const qr = quoteStick.getBoundingClientRect();   // раскрытие/стягивание считаем по липкому блоку: пока он держится, остаётся раскрытым
   let qk = smooth(Math.min(1, Math.max(0, (window.innerHeight * 0.45 - qr.top) / (window.innerHeight * 0.4))));   // раскрывается, когда карточки ушли
   qk = Math.min(qk, smooth(Math.min(1, Math.max(0, (qr.bottom - window.innerHeight * 0.3) / (window.innerHeight * 0.4)))));   // стягивается обратно в рамку, уходя с экрана («рамка», решение 23.09)
   quoteEl.style.setProperty('--qk', qk.toFixed(3));
