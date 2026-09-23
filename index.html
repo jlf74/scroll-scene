@@ -125,7 +125,7 @@
   .card--d{grid-column:span 2;background:var(--c3);color:var(--ink)}
 
   /* цитата с объёмными знаками: текст стоит на месте с самого начала, меняется только подложка */
-  .quote{position:relative;padding-bottom:15vh}   /* 15vh запаса: раскрытый на весь экран блок держится на месте (sticky) эту долю прокрутки, потом едет дальше */
+  .quote{position:relative;padding-bottom:28vh}   /* 28vh запаса: раскрытый на весь экран блок держится на месте (sticky) эту долю прокрутки, потом едет дальше (15vh — одна насечка колеса, не замечалось) */
   .quote__stick{position:sticky;top:0;min-height:calc(100vh + 60px);padding:190px 0 220px;display:flex;flex-direction:column;justify-content:flex-end}   /* снизу запас, чтобы бежевый не обрывался сразу под подписью */
   .quote__bg{position:absolute;z-index:0;background:var(--plate);top:calc(24px * (1 - var(--qk,0)));bottom:calc(24px * (1 - var(--qk,0)));left:calc(max(24px, 50vw - 696px) * (1 - var(--qk,0)));right:calc(max(24px, 50vw - 696px) * (1 - var(--qk,0)));border-radius:calc(40px * (1 - var(--qk,0)))}
   .quote .phrase,.quote .q-foot{position:relative;z-index:1;margin-left:max(88px, calc(50vw - 608px))}
