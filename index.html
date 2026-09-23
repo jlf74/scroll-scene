@@ -841,9 +841,9 @@ function frame() {
   if (forced === null && (r0.top > innerHeight || ctTail.getBoundingClientRect().top <= 0)) { requestAnimationFrame(frame); return; }   // FPS: секция ещё ниже экрана или уже закрыта контактами — не рисуем
   const p = progress();
   const Hh = innerHeight;
-  /* контакты входят снизу: k — естественный ход (0 → 1 за 100vh прокрутки), e — ускоренный: блок доезжает до верха за 75% пути, дальше стоит, пока прокрутка его не догонит */
+  /* контакты входят снизу: k — естественный ход (0 → 1 за 100vh прокрутки), e — ускоренный: блок доезжает до верха за половину пути, дальше стоит, пока прокрутка его не догонит */
   const k = forced !== null ? 0 : Math.min(1, Math.max(0, (scrollY + Hh - (journey.offsetTop + ctTail.offsetTop)) / Hh));
-  const e = Math.min(1, k / 0.75);
+  const e = Math.min(1, k / 0.5);                            // блок доезжает до верха за половину естественного хода
   /* подъём не больше, чем есть места до конца страницы: низ подвала не должен отрываться от низа окна, иначе под ним видна плашка принципов */
   const natBottom = footTail.getBoundingClientRect().bottom + curLift;
   curLift = Math.max(0, Math.min((e - k) * Hh, natBottom - Hh));
