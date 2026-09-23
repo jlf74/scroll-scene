@@ -668,7 +668,7 @@ function frame() {
   bigword.style.zIndex = waveNow > 0.01 ? '3' : '0';                             // на белом — над волной (z2), под карточками (z4); на сцене — за арками
   floorMat.opacity = 1 - blueK;
   pageEl.classList.toggle('onblue', blueK > 0.6 && waveNow < 0.85);   // шапка без подложки на синем
-  plate.parentElement.style.setProperty('--k', k.toFixed(3));
+  plate.parentElement.style.setProperty('--k', smooth(Math.min(1, p / 0.08)).toFixed(3));   // рамка уходит во весь экран быстрее колец: за 8% пути вместо 22%
   pageEl.classList.toggle('onscene', k > 0.5);                                   // с появлением арок подложка шапки исчезает
   if (plate.clientWidth !== renderer.domElement.width / renderer.getPixelRatio() || plate.clientHeight !== renderer.domElement.height / renderer.getPixelRatio()) resize();   // плашка меняет высоту — мяч не должен становиться овалом
 
