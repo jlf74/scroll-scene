@@ -24,7 +24,7 @@
   button.pill{border:0;cursor:pointer;font-family:inherit}
   .eyebrow{font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:var(--mute);font-weight:600}
 
-  .top{display:flex;align-items:center;justify-content:space-between;height:84px;padding:0 max(48px, calc(50vw - 600px));position:fixed;left:0;right:0;top:0;z-index:20;background:#fff;transition:background .35s,color .35s}
+  .top{display:flex;align-items:center;justify-content:space-between;height:84px;padding:0 max(48px, calc(50vw - 600px));position:fixed;left:0;right:0;top:0;z-index:20;background:transparent;transition:background .35s,color .35s}   /* без подложки: на обложке за шапкой и так белая страница, а при раскрытии плашка уходит под меню без задержки */
   .top .logo{font-family:'Unbounded',sans-serif;font-size:20px;font-weight:800}
   .top .r{display:flex;align-items:center;gap:18px}
   .top .r .tel{font-size:14px;font-weight:600}
@@ -38,8 +38,7 @@
   .menu-b .top nav a::after{content:"";position:absolute;left:0;right:100%;bottom:0;height:1.5px;background:currentColor;transition:right .25s}
   .menu-b .top nav a:hover::after{right:0}
   /* на синем: подложка исчезает, текст белый, кнопка остаётся красной */
-  .onscene .top{background:transparent}
-  .onscene.onwhite .top{background:#fff}   /* над белым блоком контактов подложка возвращается */
+  .onwhite .top{background:#fff}   /* только над белым блоком контактов: там текст едет под меню */
   .onblue .top{color:#fff}
   .menu-a.onblue .top nav{background:rgba(255,255,255,.12)}
   .page{padding-top:84px}
