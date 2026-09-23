@@ -144,7 +144,7 @@
   /* хвост: sticky-плашка принципов, распорка, контакты, подвал — в одном контейнере, поэтому плашка стоит до конца страницы, а контакты едут поверх без компенсаций */
   .tail{position:relative}
   .pr__stick{position:sticky;top:0;height:100vh;padding:0}
-  .pr__space{height:218vh}   /* 168vh: разбор 60vh → пауза разложенными 60vh → сбор 48vh; + 50vh пауза собранным; дальше контакты входят снизу */
+  .pr__space{height:190vh}   /* 140vh: разбор 60vh → пауза разложенными 50vh → сбор 30vh; + 50vh пауза собранным; дальше контакты входят снизу */
   .pr__plate{position:relative;height:100%;overflow:hidden;background:#fff}   /* принципы на белом (стык с цитатой — «рамка»: подложка цитаты стягивается обратно) */
   .pr__in{position:absolute;inset:0;will-change:opacity}   /* содержимое: под наездом контактов быстро уходит в прозрачность */
   /* наезд контактов, два варианта: 1 — бежевый блок контактов на белых принципах; 2 — принципы бежевеют, наезжает белый */
@@ -232,6 +232,7 @@
           <input type="range" id="spd" min="0" max="3" step="0.1" value="1" hidden>
           <label>путь <input type="range" id="path" min="0" max="1" step="0.001" value="0"></label>
           <button id="bAuto">прокрутить за меня</button>
+          <label id="fps">— fps</label>
         </div>
       </div>
     </div>
@@ -531,12 +532,14 @@ const CAM_BACK = 8;                          // камера за шаром
 const BALL_Z0 = 8, BALL_Z1 = PZ - 2 - CAM_BACK; // камера заканчивает путь под синими воротами
 const quoteEl = document.querySelector('.quote'), ctEl = document.querySelector('.ct');
 const clock = new THREE.Clock(); let t = 0, toWhiteNow = 0, waveNow = 0;
+const fpsEl = document.getElementById('fps'); let fpsN = 0, fpsT = 0;
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const _p = new THREE.Vector3(), _q = new THREE.Quaternion(), _s = new THREE.Vector3();
 const _p2 = new THREE.Vector3(), _q2 = new THREE.Quaternion();
 
 function frame() {
   const dt = Math.min(clock.getDelta(), 0.05); t += dt;
+  fpsN++; if (t - fpsT >= 1) { fpsEl.textContent = Math.round(fpsN / (t - fpsT)) + ' fps'; fpsN = 0; fpsT = t; }
   if (auto) autoStep();
   const pRaw = progress();
   const p = Math.min(1, pRaw / 0.672);                                 // путь шара
@@ -673,7 +676,7 @@ function frame() {
   let qk = smooth(Math.min(1, Math.max(0, (window.innerHeight * 0.45 - qr.top) / (window.innerHeight * 0.4))));   // раскрывается, когда карточки ушли
   qk = Math.min(qk, smooth(Math.min(1, Math.max(0, (qr.bottom - window.innerHeight * 0.3) / (window.innerHeight * 0.4)))));   // стягивается обратно в рамку, уходя с экрана («рамка», решение 23.09)
   quoteEl.style.setProperty('--qk', qk.toFixed(3));
-  if (forced !== null || journey.getBoundingClientRect().bottom > 0) renderer.render(scene, camera);   // FPS: сцена ушла вверх — не рисуем
+  if (forced !== null || (journey.getBoundingClientRect().bottom > 0 && waveNow < 0.999)) renderer.render(scene, camera);   // FPS: сцена ушла вверх или полностью под белой волной — не рисуем
   requestAnimationFrame(frame);
 }
 frame();
@@ -684,11 +687,11 @@ import * as THREE from 'three';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 const COLORS = { accent: 0x2F5776, c1: 0xC0453E, c2: 0x2E6B33, c3: 0xC39433, c6: 0xC87B2E };
-const off = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+const off = new THREE.WebGLRenderer({ antialias: true, alpha: true });   // FPS: drawImage сразу после render — preserveDrawingBuffer не нужен
 off.setPixelRatio(1); off.setSize(256, 256, false);
 off.outputColorSpace = THREE.SRGBColorSpace; off.toneMapping = THREE.NoToneMapping;
 const env = new THREE.PMREMGenerator(off).fromScene(new RoomEnvironment(off), 0.04).texture;
-const matte = (hex) => new THREE.MeshPhysicalMaterial({ color: new THREE.Color(hex), roughness: 0.34, metalness: 0.12, envMapIntensity: 0.4 });
+const matte = (hex) => new THREE.MeshStandardMaterial({ color: new THREE.Color(hex), roughness: 0.34, metalness: 0.12, envMapIntensity: 0.4 });   // FPS: Standard вместо Physical, на глаз то же
 const EX = { depth: 0.45, bevelEnabled: true, bevelThickness: 0.12, bevelSize: 0.1, bevelSegments: 6, curveSegments: 24 };
 const extrude = (shape) => { const g = new THREE.ExtrudeGeometry(shape, EX); g.center(); return g; };
 function bolt() { const s = new THREE.Shape(); [[0.2,1],[-0.55,-0.1],[-0.05,-0.1],[-0.3,-1],[0.55,0.15],[0.05,0.15]].forEach(([x,y],i)=> i?s.lineTo(x,y):s.moveTo(x,y)); s.closePath(); return s; }
@@ -711,12 +714,13 @@ document.querySelectorAll('.phrase .b').forEach((b) => {
 });
 const tgt = { x: 0, y: 0 }, cur = { x: 0, y: 0 };
 window.addEventListener('pointermove', (e) => { tgt.x = (e.clientX / innerWidth - 0.5) * 2; tgt.y = (e.clientY / innerHeight - 0.5) * 2; });
-const clock = new THREE.Clock(); let t = 0;
+const clock = new THREE.Clock(); let t = 0, odd = false;
 (function frame() {
   t += Math.min(clock.getDelta(), 0.05);
   cur.x += (tgt.x - cur.x) * 0.06; cur.y += (tgt.y - cur.y) * 0.06;
   items.forEach((it) => {
     const r = it.cv.getBoundingClientRect(); if (r.bottom < 0 || r.top > innerHeight) return;
+    if ((odd = !odd)) return;                                   // FPS: значки обновляются через кадр
     it.obj.rotation.y = t * it.spd + it.ph + cur.x * 0.5; it.obj.rotation.x = Math.sin(t * 0.7 + it.ph) * 0.18 + cur.y * 0.3;
     off.render(it.scene, it.cam); it.ctx.clearRect(0, 0, 256, 256); it.ctx.drawImage(off.domElement, 0, 0, 256, 256);
   });
@@ -727,11 +731,11 @@ const clock = new THREE.Clock(); let t = 0;
 <script type="module">
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
-const off = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
-off.setPixelRatio(1); off.setSize(880, 550, false);   // FPS: три оффскрин-рендера в кадр, без ретины
+const off = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+off.setPixelRatio(1); off.setSize(704, 440, false);   // FPS: три оффскрин-рендера в кадр, без ретины и на 36% меньше пикселей
 off.outputColorSpace = THREE.SRGBColorSpace; off.toneMapping = THREE.NoToneMapping;
 const env = new THREE.PMREMGenerator(off).fromScene(new RoomEnvironment(off), 0.04).texture;
-const matte = (hex) => new THREE.MeshPhysicalMaterial({ color: new THREE.Color(hex), roughness: 0.34, metalness: 0.12, envMapIntensity: 0.4 });
+const matte = (hex) => new THREE.MeshStandardMaterial({ color: new THREE.Color(hex), roughness: 0.34, metalness: 0.12, envMapIntensity: 0.4 });
 const C = { accent: 0x2F5776, c1: 0xC0453E, c2: 0x2E6B33, c3: 0xC39433, c6: 0xC87B2E };
 const sph = (r, hex, x, y, z) => { const m = new THREE.Mesh(new THREE.SphereGeometry(r, 64, 64), matte(hex)); m.position.set(x, y, z); return m; };
 const SETS = [
@@ -740,11 +744,11 @@ const SETS = [
   () => { const g = new THREE.Group(); [[1.1, C.c1, -2.4, 0.2, 0], [0.9, C.c6, 0, -0.5, 1.0], [0.75, C.c1, 2.4, 0.4, 0.2], [0.5, C.c6, 4.0, -0.9, 1.4], [0.45, C.c6, -4.1, -0.8, 1.2], [0.6, C.c1, 1.2, 1.7, -0.8]].forEach((a) => g.add(sph(...a))); return g; },
 ];
 const scenes = [...document.querySelectorAll('canvas.sph')].map((cv, i) => {
-  cv.width = 880; cv.height = 550;
+  cv.width = 704; cv.height = 440;
   const s = new THREE.Scene(); s.environment = env;
   s.add(new THREE.HemisphereLight(0xfff8ee, 0xd9cbb2, 0.45));
   const key = new THREE.DirectionalLight(0xfff4e6, 1.5); key.position.set(-6, 9, 8); s.add(key);
-  const cam = new THREE.PerspectiveCamera(28, 880 / 550, 0.1, 100); cam.position.set(0, 0.6, 15); cam.lookAt(0, 0, 0);
+  const cam = new THREE.PerspectiveCamera(28, 704 / 440, 0.1, 100); cam.position.set(0, 0.6, 15); cam.lookAt(0, 0, 0);
   const obj = SETS[i](); s.add(obj);
   return { cv, ctx: cv.getContext('2d'), s, cam, obj, ph: i * 2.1 };
 });
@@ -755,9 +759,10 @@ const clock = new THREE.Clock(); let t = 0;
   t += Math.min(clock.getDelta(), 0.05);
   cur.x += (tgt.x - cur.x) * 0.05; cur.y += (tgt.y - cur.y) * 0.05;
   scenes.forEach((sc) => {
+    if (sc.cv.closest('.dir').style.opacity === '0') return;   // FPS: карточка ещё не выехала
     const r = sc.cv.getBoundingClientRect(); if (r.bottom < 0 || r.top > innerHeight || r.width === 0) return;
     sc.obj.rotation.y = Math.sin(t * 0.3 + sc.ph) * 0.25 + cur.x * 0.35; sc.obj.rotation.x = cur.y * 0.2;
-    off.render(sc.s, sc.cam); sc.ctx.clearRect(0, 0, 880, 550); sc.ctx.drawImage(off.domElement, 0, 0, 880, 550);
+    off.render(sc.s, sc.cam); sc.ctx.clearRect(0, 0, 704, 440); sc.ctx.drawImage(off.domElement, 0, 0, 704, 440);
   });
   requestAnimationFrame(frame);
 })();
@@ -802,7 +807,7 @@ const parts = COLORS.map((hex, i) => {
 });
 function resize() { const w = plate.clientWidth, h = plate.clientHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); }
 resize(); window.addEventListener('resize', resize);
-const ANIM = 1.68, HOLD = 0.5;                             // разбор-пауза-сбор — первые 168vh, потом 50vh пауза собранным; дальше контакты едут поверх
+const ANIM = 1.4, HOLD = 0.5;                              // разбор-пауза-сбор — первые 140vh, потом 50vh пауза собранным; дальше контакты едут поверх
 function progress() { if (forced !== null) return Math.min(1, Math.max(0, parseFloat(forced))); const r = journey.getBoundingClientRect(); return Math.min(1, Math.max(0, -r.top / (ANIM * innerHeight))); }
 const smooth = (x) => x * x * (3 - 2 * x);
 const target = { x: 0, y: 0 }, cur = { x: 0, y: 0 };
@@ -813,7 +818,7 @@ const _v = new THREE.Vector3();
 function frame() {
   t += Math.min(clock.getDelta(), 0.05);
   const r0 = journey.getBoundingClientRect();
-  if (forced === null && (r0.bottom < -innerHeight || r0.top > innerHeight * 2)) { requestAnimationFrame(frame); return; }   // вне экрана не рисуем
+  if (forced === null && (r0.top > innerHeight || ctTail.getBoundingClientRect().top <= 0)) { requestAnimationFrame(frame); return; }   // FPS: секция ещё ниже экрана или уже закрыта контактами — не рисуем
   const p = progress();
   const Hh = innerHeight;
   const over = forced !== null ? 0 : Math.min(1, Math.max(0, (Hh - ctTail.getBoundingClientRect().top) / Hh));   // контакты входят снизу: 0 → 1, когда их верх дошёл до верха экрана
@@ -822,8 +827,8 @@ function frame() {
   /* плашка бежевеет с начала сборки пирамидки (p 0.5→1), бежевой остаётся до наезда белого блока контактов */
   const beige = smooth(Math.min(1, Math.max(0, (p - 0.5) / 0.5)));
   plate.style.backgroundColor = 'color-mix(in srgb, #F0ECE4 ' + (beige * 100).toFixed(1) + '%, #fff)';
-  /* 0…0.357 — слои расходятся снизу вверх, один за другим (60vh); 0.357…0.714 — висят разложенными (60vh); 0.714…1 — собираются обратно (48vh) */
-  const K = p < 0.357 ? p / 0.357 : p > 0.714 ? (1 - p) / 0.286 : 1;   // 0 → 1 → (пауза) → 0
+  /* 0…0.4286 — слои расходятся снизу вверх, один за другим (60vh); 0.4286…0.7857 — висят разложенными (50vh); 0.7857…1 — собираются обратно (30vh) */
+  const K = p < 0.4286 ? p / 0.4286 : p > 0.7857 ? (1 - p) / 0.2143 : 1;   // 0 → 1 → (пауза) → 0
   cur.x += (target.x - cur.x) * 0.05; cur.y += (target.y - cur.y) * 0.05;
   group.rotation.y = 0.7 * (1 - K * 0.8) + cur.x * 0.12 + Math.sin(t * 0.3) * 0.05;   // собранный конус на три четверти, разобранный почти фронтально
   group.rotation.x = 0.18 * (1 - K) + cur.y * 0.06;
