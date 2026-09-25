@@ -155,7 +155,7 @@
   /* цитата с объёмными знаками: текст стоит на месте с самого начала, меняется только подложка */
   .quote{position:relative}
   .quote__space{height:22vh}   /* распорка: раскрытый на весь экран блок держится на месте (sticky) 22vh прокрутки, потом едет дальше. Именно блок, не padding: sticky не может уйти в отступ родителя */
-  .quote__stick{position:sticky;top:0;min-height:calc(100vh + 60px);padding:190px 0 220px;display:flex;flex-direction:column;justify-content:flex-end}   /* снизу запас, чтобы бежевый не обрывался сразу под подписью */
+  .quote__stick{position:sticky;top:0;min-height:100vh;padding:120px 0;display:flex;flex-direction:column;justify-content:center}   /* ровно экран: иначе прилипание не видно, текст уезжает за кадр */
   .quote__bg{position:absolute;z-index:0;background:var(--plate);top:calc(24px * (1 - var(--qk,0)));bottom:calc(24px * (1 - var(--qk,0)));left:calc(max(24px, 50vw - 696px) * (1 - var(--qk,0)));right:calc(max(24px, 50vw - 696px) * (1 - var(--qk,0)));border-radius:calc(40px * (1 - var(--qk,0)))}
   .quote .phrase,.quote .q-foot{position:relative;z-index:1;margin-left:max(88px, calc(50vw - 608px))}
   .phrase{font-family:'Unbounded',sans-serif;font-weight:800;letter-spacing:-.04em;line-height:1.12;font-size:54px;max-width:1240px;text-wrap:balance}
@@ -224,6 +224,7 @@
   .mcards:empty{display:none}
   /* карточки направлений: на узком экране JS переносит их сюда из сцены — в 3D-полёте на телефоне они не читаются */
   .mcards{padding:8px 20px 48px;background:#fff}
+  .mcards__h{font-family:'Unbounded',sans-serif;font-weight:800;font-size:32px;line-height:1.05;letter-spacing:-.04em;text-align:center;margin:0 0 18px;padding-top:28px}
   .mcards .cards{position:static;transform:none;width:auto;display:flex;flex-direction:column;gap:14px;perspective:none;pointer-events:auto}
   .mcards .dir{opacity:1!important;transform:none!important;border-radius:24px;padding:12px 12px 22px}
   .mcards .dir .back{display:none}
@@ -276,7 +277,7 @@
     .dir .n{font-size:20px}
     .dir .tags span{padding:7px 11px;font-size:12px}
     .dir a{padding:8px 14px;font-size:12px}
-    .quote__stick{padding:120px 0 150px;min-height:calc(100svh + 40px)}
+    .quote__stick{padding:100px 0;min-height:100svh}
     .quote .phrase,.quote .q-foot{margin-left:40px;margin-right:40px}
     .phrase{font-size:34px}
     .pr__head{max-width:min(340px,42vw)}
@@ -294,9 +295,9 @@
   @media (max-width:640px){
     .top{height:64px;padding:0 20px}
     .page{padding-top:64px;--gutter:20px}
-    .journey{height:380vh}          /* путь 82% прокрутки (312vh), дальше заголовок, волна и карточки */
+    .journey{height:340vh}          /* путь 93% прокрутки (316vh), хвост 24vh — только белая волна */
     .pr__space{height:0}            /* принципы на телефоне — обычная секция, распорка для sticky не нужна */
-    .stick{top:0;height:var(--appvh,100svh);padding:0;min-height:0}   /* на телефоне сцена сразу на весь экран */
+    .stick{top:0;height:100dvh;padding:0;min-height:0}   /* динамическая высота: низ сцены всегда совпадает с низом экрана */
     .plate{border-radius:0}
     .top .logo{font-size:22px}
     .top .r .pill{display:none}
@@ -322,21 +323,21 @@
     .hero__foot{left:20px;right:20px;width:auto;height:52px;font-size:11px}
     .hero__foot span:last-child{display:none}
 
-    .fact{top:16vh;bottom:auto;left:16px;right:16px;max-width:none}
+    .fact{top:50%;bottom:auto;left:16px;right:16px;max-width:none;margin-top:-90px}   /* по центру экрана: цифра — главный акцент */
     .fact--r{left:16px;right:16px;text-align:left}
     .fact--r span{margin-left:0}
     .fact b{font-size:64px}
     .fact span{font-size:17px;margin-top:10px;max-width:none}
     .fact small{margin-top:10px;font-size:10px}
-    .f-plate .fact{width:auto;max-width:none;padding:20px 20px 22px;border-radius:20px}
+    .f-plate .fact{width:max-content;max-width:calc(100vw - 32px);padding:18px 22px 20px;border-radius:20px}
 
     .final{padding-top:186px}
     .final--2{padding-top:48vh}     /* «Направления группы» — над стыком с карточками, а не в пустоте */
     .final h2{font-size:32px;max-width:11ch}
     .final p{margin-top:14px;font-size:14px}
 
-    .quote__stick{position:static;padding:88px 0;min-height:var(--appvh,100svh);justify-content:center}
-    .quote__space{height:0}
+    .quote__stick{position:sticky;top:0;padding:72px 0;min-height:100dvh;justify-content:center}
+    .quote__space{height:18vh}   /* и на телефоне бежевый блок держится, прежде чем уехать */
     .quote__bg{left:0;right:0;top:0;bottom:0;border-radius:0}
     .quote .phrase,.quote .q-foot{margin-left:20px;margin-right:20px}
     .phrase{font-size:26px;line-height:1.16}
@@ -347,11 +348,11 @@
 
     .pr{height:auto}
     .pr__stick{position:static;height:auto;padding:0}
-    .pr__plate{height:var(--appvh,100svh);border-radius:0}
+    .pr__plate{height:100dvh;border-radius:0}
     .pr__head{position:absolute;left:20px;right:20px;top:56px;transform:none;max-width:none;text-align:center}
     .pr__head h2{font-size:32px}
     .pr__head .sub{font-size:14px;margin-top:14px;max-width:none}
-    .pr__lbl{font-size:15px;white-space:normal;max-width:50vw;gap:8px;line-height:1.16}
+    .pr__lbl{font-size:16px;white-space:normal;max-width:min(300px,84vw);gap:8px;line-height:1.16;transform:translate(-50%,0);justify-content:center;text-align:center}
     .pr__lbl small{font-size:10px}
 
     .ct{border-radius:0;box-shadow:none;transform:none!important;padding:56px 20px 40px;grid-template-columns:1fr;gap:28px}
@@ -497,22 +498,35 @@
   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap' }).addTo(m);
   L.marker([55.7384, 37.6147], { icon: L.divIcon({ className: 'pin', html: '<i></i>', iconSize: [26, 26], iconAnchor: [13, 26], popupAnchor: [0, -24] }) }).addTo(m)
     .bindPopup('<b>STRONG</b><br>Москва, ул. Большая Якиманка, д. 22');
+  /* контейнер меняет размер (адаптив, панель браузера) — без пересчёта карта показывает не тот участок */
+  var recenter = function () { m.invalidateSize(); m.setView([55.7384, 37.6147], m.getZoom()); };
+  if (window.ResizeObserver) new ResizeObserver(recenter).observe(document.getElementById('map'));
+  addEventListener('orientationchange', function () { setTimeout(recenter, 300); });
+  setTimeout(recenter, 600);
 })();
 </script>
 
 <script>
 /* высота окна фиксируется при загрузке и меняется только при повороте: иначе панель браузера на телефоне
    постоянно меняет innerHeight, сцена пересчитывается и мяч дёргается */
-(function () {
+(function () {   /* запасной путь для браузеров без lvh: одно измерение при загрузке, без пересчёта на прокрутке */
+  if (CSS && CSS.supports && CSS.supports('height', '100lvh')) return;
   var last = innerWidth;
   function setVH() { document.documentElement.style.setProperty('--appvh', innerHeight + 'px'); }
   setVH();
   addEventListener('resize', function () { if (Math.abs(innerWidth - last) > 40) { last = innerWidth; setVH(); } });
-  addEventListener('orientationchange', function () { setTimeout(setVH, 250); });
 })();
 /* узкий экран определяем один раз: карточки физически переезжают в DOM, поэтому менять решение на лету нельзя */
 window.NARROW = innerWidth <= 640;
-if (window.NARROW) document.getElementById('mcards').appendChild(document.getElementById('cards'));
+if (window.NARROW) {
+  var mc = document.getElementById('mcards'), f2 = document.getElementById('final2');
+  var h = document.createElement('h2');                       // заголовок секции карточек вместо экранного в сцене
+  h.className = 'mcards__h';
+  h.innerHTML = f2.querySelector('h2').innerHTML;
+  mc.appendChild(h);
+  f2.remove();
+  mc.appendChild(document.getElementById('cards'));
+}
 /* меню: плавный переход к разделу и подсветка активного (разделы живут внутри sticky-сцен, поэтому позиции считаем) */
 (function () {
   var page = document.querySelector('.page'), nav = document.getElementById('nav'), burger = document.getElementById('burger');
@@ -562,6 +576,7 @@ const heroF = document.getElementById('heroF');
 const facts = [...document.querySelectorAll('.fact')].map((el) => ({ el, z: parseFloat(el.dataset.z) }));
 const finalEl = document.getElementById('final');
 const final2 = document.getElementById('final2'), h2dirs = document.getElementById('h2dirs'), waveEl = document.getElementById('wave');
+const HAS_F2 = !!final2;        // на телефоне заголовок «Направления группы» живёт в секции карточек, а не в сцене
 const variant = { facts: 'plate', gates: 'floor' };
 plate.classList.add('f-plate');
 const pageEl = document.querySelector('.page');
@@ -727,8 +742,8 @@ const cream = new THREE.Color(CREAM), blue = new THREE.Color(BLUE);
 const tint = (hex, k) => cream.clone().lerp(new THREE.Color(hex), k);
 const NARROW0 = innerWidth <= 640;
 const BG_KEYS = [                                     // синий заливает мир, пока синяя арка поднимается, через светлый синий, без серого
-  [8, cream], [-6, tint(0xC87B2E, .10)], [-20, tint(0xC39433, .10)], [-32, tint(0x2E6B33, .10)], [NARROW0 ? -41 : -38, cream],
-  [NARROW0 ? -45 : -42, new THREE.Color(0x7FA6C8)], [NARROW0 ? -49 : -47, blue],
+  [8, cream], [-6, tint(0xC87B2E, .10)], [-20, tint(0xC39433, .10)], [-32, tint(0x2E6B33, .10)], [NARROW0 ? -38 : -38, cream],
+  [NARROW0 ? -46 : -42, new THREE.Color(0x7FA6C8)], [NARROW0 ? -54 : -47, blue],
 ];
 const bgColor = new THREE.Color();
 function bgAt(z) {
@@ -806,7 +821,7 @@ function frame() {
   fpsN++; if (t - fpsT >= 1) { fpsEl.textContent = Math.round(fpsN / (t - fpsT)) + ' fps'; fpsN = 0; fpsT = t; }
   if (auto) autoStep();
   const pRaw = progress();
-  const PE = NARROW ? 0.82 : 0.672;                                    // доля прокрутки на путь шара; на телефоне длиннее — цифры успевают показаться
+  const PE = NARROW ? 0.93 : 0.672;                                    // доля прокрутки на путь шара; на телефоне длиннее — цифры успевают показаться
   const p = Math.min(1, pRaw / PE);                                    // путь шара
   const q = Math.min(1, Math.max(0, (pRaw - PE) / (1 - PE)));          // заголовок → карточки
   if (forced === null) ui.path.value = pRaw.toFixed(3);
@@ -865,7 +880,7 @@ function frame() {
   const pushVh = Math.max(0, h2in * 100 - (100 - (NARROW ? 46 : 68) + (NARROW ? 0.46 * plate.clientHeight : 190) / plate.clientHeight * 100)) * 1.05;   // верх заголовка = 190px + (1−h2in)·100vh; низ сжатого мяча стоит на 68vh (замер) → контакт при h2in≈0.52, дальше мяч едет чуть быстрее заголовка, не отрываясь
   const VH = 0.0746;                                                          // 1vh в мировых единицах на дистанции мяча
   ball.scale.setScalar((CORE_R * (1 - k) + BALL_R * k) * (1 - 0.5 * shrink));
-  ball.position.y += endK * (NARROW ? 2.3 : 0.7) - shrink * 0.5 * BALL_R + pushVh * VH;         // под заголовок (подъём 0.7, чтобы не лезть на подпись) → сжался (низ на месте) → выталкивание
+  ball.position.y += endK * (NARROW ? 1.1 : 0.7) - shrink * 0.5 * BALL_R + pushVh * VH;         // под заголовок (подъём 0.7, чтобы не лезть на подпись) → сжался (низ на месте) → выталкивание
   ball.visible = pushVh < 70;
   ball.rotation.x = -(BALL_Z0 - bz) / BALL_R;
   ball.rotation.y += dt * speed * 0.08 * (1 - k);
@@ -893,14 +908,16 @@ function frame() {
   const fa = smooth(Math.min(1, Math.max(0, (-51 - bz) / 7)));
   /* второй заголовок и карточки */
   const rise = smooth(Math.min(1, Math.max(0, (q - (NARROW ? 0.34 : 0.3)) / 0.14)));              // карточка идёт сразу за заголовком
-  const waveK = smooth(Math.min(1, Math.max(0, (q - (NARROW ? 0.34 : 0.35)) / (NARROW ? 0.26 : 0.2))));             // белая волна сразу за ней
+  const waveK = smooth(Math.min(1, Math.max(0, (q - (NARROW ? 0.12 : 0.35)) / (NARROW ? 0.55 : 0.2))));             // белая волна сразу за ней
   const spin = smooth(Math.min(1, Math.max(0, (q - 0.52) / 0.34)));             // оборот длиннее
   const sides = smooth(Math.min(1, Math.max(0, (q - 0.5) / 0.2)));              // боковые выезжают с началом оборота и висят, пока он идёт
-  final2.style.opacity = q > 0.2 ? '1' : '0';
-  final2.style.transform = 'translateY(' + ((1 - h2in) * 100).toFixed(1) + 'vh)';
+  if (HAS_F2) {
+    final2.style.opacity = q > 0.2 ? '1' : '0';
+    final2.style.transform = 'translateY(' + ((1 - h2in) * 100).toFixed(1) + 'vh)';
+  }
   waveNow = waveK;
   waveEl.style.transform = 'translateY(' + ((1 - waveK) * 100).toFixed(1) + '%) translateY(' + ((1 - waveK) * 16).toFixed(1) + 'vh)';
-  h2dirs.style.color = waveK > 0.74 ? '#14141A' : '#fff';   // темнеет, когда кромка волны проходит через заголовок
+  if (HAS_F2) h2dirs.style.color = waveK > 0.74 ? '#14141A' : '#fff';   // темнеет, когда кромка волны проходит через заголовок
   if (!NARROW) {                                                              // на узком экране карточки живут отдельной секцией, а не в сцене
     cardC.style.opacity = rise > 0.001 ? '1' : '0';
     cardC.style.transform = 'translateY(' + ((1 - rise) * 110).toFixed(1) + 'vh) rotateY(' + (spin * 360).toFixed(1) + 'deg)';
@@ -915,22 +932,23 @@ function frame() {
   const bg = bgAt(bz);
   plate.style.backgroundColor = '#' + bg.getHexString(); scene.fog.color.copy(bg);
   floorMat.color.copy(bg).lerp(BEIGE, 0.22).multiplyScalar(0.66);   // с учётом освещения пол выходит в тон фона, чуть бежевее
-  const blueK = smooth(Math.min(1, Math.max(0, ((NARROW ? -43 : -40) - bz) / 7)));           // в синем финале пол растворяется, остаётся заливка
+  const blueK = smooth(Math.min(1, Math.max(0, ((NARROW ? -40 : -40) - bz) / (NARROW ? 13 : 7))));           // в синем финале пол растворяется, остаётся заливка
   bigword.style.opacity = (0.06 * Math.max(smooth(Math.min(1, Math.max(0, (p - 0.2) / 0.08))) * (1 - blueK), waveNow)).toFixed(3);   // слово появляется с воротами, уходит в синем финале и возвращается с белой волной под карточками
   bigword.style.zIndex = waveNow > 0.01 ? '3' : '0';                             // на белом — над волной (z2), под карточками (z4); на сцене — за арками
   floorMat.opacity = 1 - blueK;
   pageEl.classList.toggle('onblue', blueK > 0.6 && waveNow < 0.85);   // шапка без подложки на синем
   plate.parentElement.style.setProperty('--k', smooth(Math.min(1, p / 0.08)).toFixed(3));   // рамка уходит во весь экран быстрее колец: за 8% пути вместо 22%
   pageEl.classList.toggle('onscene', k > 0.5);                                   // с появлением арок подложка шапки исчезает
-  if (plate.clientWidth !== renderer.domElement.width / renderer.getPixelRatio() || plate.clientHeight !== renderer.domElement.height / renderer.getPixelRatio()) resize();   // плашка меняет высоту — мяч не должен становиться овалом
+  const rw = renderer.domElement.width / renderer.getPixelRatio(), rh = renderer.domElement.height / renderer.getPixelRatio();
+  if (Math.abs(plate.clientWidth - rw) > 1 || Math.abs(plate.clientHeight - rh) > (NARROW ? 24 : 1)) resize();   // на телефоне мелкие скачки высоты от панели браузера игнорируем   // плашка меняет высоту — мяч не должен становиться овалом
 
   sats.forEach(({ a, s }) => { a.getWorldPosition(_p); s.position.copy(_p); s.scale.setScalar(Math.max(0.001, 1 - k * 1.6)); s.visible = k < 0.6; });
 
   /* камера: 3/4 на кольцо → низко, за шаром, под большой аркой */
   /* на узком экране: камера дальше, смотрит выше колец — текст сверху, скульптура в нижней половине */
-  const cam0 = _p.set((NARROW ? 5.4 : 0) + cur.x * 0.9, 8.9 - cur.y * 0.4, NARROW ? 19.5 : 23.5), look0 = _p2.set(NARROW ? 5.4 : 0.6, NARROW ? 12.4 : 8.2, 0);   // на телефоне камера ближе: скульптура крупная, занимает низ экрана
+  const cam0 = _p.set((NARROW ? 5.4 : 0) + cur.x * 0.9, 8.9 - cur.y * 0.4, NARROW ? 16.5 : 23.5), look0 = _p2.set(NARROW ? 5.4 : 0.6, NARROW ? 13.2 : 8.2, 0);   // на телефоне: крупно и в нижней части экрана, как фон   // на телефоне камера ближе: скульптура крупная, занимает низ экрана
   const cam1 = new THREE.Vector3(bx * 0.5 + (NARROW ? 0.4 : 3.0) * (1 - endK) + bx * 0.5 * endK + cur.x * 0.9 * mouseK, 1.15 + 0.5 * endK - cur.y * 0.25 * mouseK, bz + (NARROW ? 11.5 : CAM_BACK));
-  const look1 = new THREE.Vector3((pathX(bz - 9) * 0.6 - (NARROW ? 0.2 : 1.2)) * (1 - endK) + bx * endK, (NARROW ? 5.6 : 4.6) - (NARROW ? 4.3 : 3.3) * endK, bz - 9);   // на пути камера смотрит выше: мяч и ворота уходят вниз, цифры ближе к середине; в финале прежняя раскадровка
+  const look1 = new THREE.Vector3((pathX(bz - 9) * 0.6 - (NARROW ? 0.2 : 1.2)) * (1 - endK) + bx * endK, (NARROW ? 7.4 : 4.6) - (NARROW ? 5.3 : 3.3) * endK, bz - 9);   // на телефоне камера смотрит выше: мяч в нижней трети   // на пути камера смотрит выше: мяч и ворота уходят вниз, цифры ближе к середине; в финале прежняя раскадровка
   camera.position.lerpVectors(cam0, cam1, k);
   camera.lookAt(look0.lerp(look1, k));
   camera.fov = fovFor(28 + (50 - 28) * k); camera.updateProjectionMatrix();
@@ -1073,7 +1091,7 @@ const group = new THREE.Group(); scene.add(group);
 let spreadX = 4.6;                                        // насколько слои уезжают влево при разборе
 function place() {                                        // раскладка по ширине плашки: справа должно хватать места подписям
   const w = plate.clientWidth;
-  if (w <= 640) { group.position.set(-2.8, -1.2, 0); group.scale.setScalar(1); spreadX = 0.6; }   // на телефоне слои крупные, ниже заголовка, левее — справа подписи
+  if (w <= 640) { group.position.set(0, -4.4, 0); group.scale.setScalar(0.72); spreadX = 0; }   // на телефоне слои по центру и ниже заголовка, подписи под ними
   else if (w <= 1100) { group.position.set(2.6, 0, 0); group.scale.setScalar(0.76); spreadX = 3.4; }   // планшет: правее и мельче, чтобы не лезть на заголовок
   else { group.position.set(4.6, 0, 0); group.scale.setScalar(1); spreadX = 4.6; }
 }
@@ -1119,7 +1137,8 @@ function frame() {
   cur.x += (target.x - cur.x) * 0.05; cur.y += (target.y - cur.y) * 0.05;
   group.rotation.y = 0.7 * (1 - K * 0.8) + cur.x * 0.12 + Math.sin(t * 0.3) * 0.05;   // собранный конус на три четверти, разобранный почти фронтально
   group.rotation.x = 0.18 * (1 - K) + cur.y * 0.06;
-  const GAP = plate.clientWidth <= 640 ? 3.0 : 1.7;          // расстояние между разведёнными слоями; на телефоне колонка на весь экран
+  const under = plate.clientWidth <= 640;                   // подписи под слоями (телефон) или справа (десктоп)
+  const GAP = under ? 4.0 : 1.7;          // расстояние между разведёнными слоями; на телефоне колонка на весь экран
   /* общая вертикаль подписей: правый край самого большого слоя в разобранном виде */
   _v.set(LEN[0] * 0.5 * 0.66 + (plate.clientWidth <= 640 ? 1.1 : 1.9), 0, 0); parts[0].m.localToWorld(_v); _v.project(camera);   // зазор от синего бруса до цифры
   const labelX = (_v.x * 0.5 + 0.5) * plate.clientWidth;
@@ -1134,7 +1153,12 @@ function frame() {
     const lk = smooth(Math.min(1, Math.max(0, (ki - 0.5) / 0.4)));
     const L = labels[pt.i];
     L.style.opacity = lk.toFixed(3);
-    L.style.left = (labelX + (1 - lk) * 24).toFixed(0) + 'px'; L.style.top = y.toFixed(0) + 'px';
+    if (under) {                                   // на телефоне подпись стоит под своим слоем
+      L.style.left = ((_v.x * 0.5 + 0.5) * plate.clientWidth).toFixed(0) + 'px';
+      L.style.top = (y + 0.031 * plate.clientHeight + (1 - lk) * 12).toFixed(0) + 'px';
+    } else {
+      L.style.left = (labelX + (1 - lk) * 24).toFixed(0) + 'px'; L.style.top = y.toFixed(0) + 'px';
+    }
   });
   renderer.render(scene, camera);
   requestAnimationFrame(frame);
