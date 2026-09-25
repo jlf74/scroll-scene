@@ -7,6 +7,9 @@
 <title>STRONG — коммуникационная группа</title>
 </head>
 <body>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232F5776'/%3E%3Ccircle cx='32' cy='32' r='13' fill='%23C0453E'/%3E%3C/svg%3E">
+
 <link rel="stylesheet" href="fonts/fonts.css">
 <style>
   :root{color-scheme:light;
@@ -25,22 +28,27 @@
   .eyebrow{font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:var(--mute);font-weight:600}
 
   .top{display:flex;align-items:center;justify-content:space-between;height:84px;padding:0 max(48px, calc(50vw - 600px));position:fixed;left:0;right:0;top:0;z-index:20;background:transparent;transition:background .35s,color .35s}   /* без подложки: на обложке за шапкой и так белая страница, а при раскрытии плашка уходит под меню без задержки */
-  .top .logo{font-family:'Unbounded',sans-serif;font-size:20px;font-weight:800}
+  .top .logo{font-family:'Unbounded',sans-serif;font-size:28px;font-weight:800;letter-spacing:-.02em;line-height:1}
   .top .r{display:flex;align-items:center;gap:18px}
   .top .r .tel{font-size:14px;font-weight:600}
   .top .r .pill{height:40px;padding:0 18px;background:var(--c1);color:#fff;font-size:14px}
-  /* А · пилюля */
-  .menu-a .top nav{display:flex;gap:2px;padding:4px;border-radius:999px;background:var(--cream);transition:background .35s}
-  .menu-a .top nav a{display:inline-flex;align-items:center;height:36px;padding:0 16px;border-radius:999px;font-size:14px;font-weight:500}
-  /* Б · строка текста */
-  .menu-b .top nav{display:flex;gap:32px}
-  .menu-b .top nav a{font-size:14px;font-weight:500;position:relative;padding:4px 0}
-  .menu-b .top nav a::after{content:"";position:absolute;left:0;right:100%;bottom:0;height:1.5px;background:currentColor;transition:right .25s}
-  .menu-b .top nav a:hover::after{right:0}
-  /* на синем: подложка исчезает, текст белый, кнопка остаётся красной */
+  /* меню: без плашки — текст с растущей красной линией; активный раздел подсвечен (решение Дмитрия 25.09) */
+  .top nav{display:flex;gap:34px}
+  .top nav a{position:relative;font-size:15px;font-weight:500;padding:6px 0;opacity:.7;transition:opacity .2s}
+  .top nav a::after{content:"";position:absolute;left:0;right:100%;bottom:0;height:2px;background:var(--c1);transition:right .3s cubic-bezier(.4,0,.2,1)}
+  .top nav a:hover{opacity:1}
+  .top nav a:hover::after,.top nav a.on::after{right:0}
+  .top nav a.on{opacity:1;font-weight:600}
   .onwhite .top{background:#fff}   /* только над белым блоком контактов: там текст едет под меню */
   .onblue .top{color:#fff}
-  .menu-a.onblue .top nav{background:rgba(255,255,255,.12)}
+  .onblue .top nav a::after{background:#fff}
+  /* бургер: только на узких экранах */
+  .burger{display:none;width:44px;height:44px;border:0;background:none;padding:0;cursor:pointer;position:relative;color:inherit}
+  .burger span{position:absolute;left:11px;width:22px;height:2px;background:currentColor;transition:transform .3s,opacity .2s}
+  .burger span:nth-child(1){top:18px}
+  .burger span:nth-child(2){top:25px}
+  .open .burger span:nth-child(1){transform:translateY(3.5px) rotate(45deg)}
+  .open .burger span:nth-child(2){transform:translateY(-3.5px) rotate(-45deg)}
   .page{padding-top:84px}
 
   .journey{height:560vh;position:relative}
@@ -62,6 +70,9 @@
   .hero__b{margin-top:36px}
   .hero__foot{position:absolute;left:var(--gutter);width:520px;bottom:0;height:64px;z-index:3;display:flex;align-items:center;justify-content:space-between;border-top:1px solid rgba(20,20,26,.12);font-size:13px;color:var(--mute);letter-spacing:.04em}
   .hero__foot .scroll{display:inline-flex;align-items:center;gap:10px;text-transform:uppercase;font-weight:600;letter-spacing:.14em;font-size:11px}
+  .hero__foot .scroll i{font-style:normal;animation:sc 1.8s ease-in-out infinite}
+  @keyframes sc{0%,100%{transform:translateY(0);opacity:.55}50%{transform:translateY(4px);opacity:1}}
+  @media (prefers-reduced-motion:reduce){.hero__foot .scroll i{animation:none}}
 
   .ctl{display:none;position:absolute;right:24px;bottom:20px;z-index:4;gap:6px;align-items:center;font-size:11px;color:var(--mute);flex-wrap:wrap;justify-content:flex-end;max-width:760px}
   .demo .ctl{display:flex}
@@ -93,7 +104,7 @@
   .wave svg{position:absolute;left:0;right:0;bottom:100%;width:100%;height:16vh;display:block}
   .wave i{position:absolute;inset:0;background:#fff;display:block}
   /* второй заголовок и карточки направлений — внутри той же сцены */
-  .final--2{color:#fff;will-change:transform,opacity}
+  .final--2{color:#fff;will-change:transform,opacity;padding-top:clamp(190px,24vh,420px)}   /* на высоких экранах заголовок ниже: меньше пустоты до карточек */
   .final{will-change:transform,opacity}
   .cards{position:absolute;left:50%;bottom:20px;z-index:4;width:min(1392px, 100vw - 48px);transform:translate(-50%,0);display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;perspective:1600px;pointer-events:none}
   .cards .dir{pointer-events:auto;opacity:0;will-change:transform,opacity;transform-style:preserve-3d;position:relative}
@@ -191,15 +202,168 @@
   .foot__dev{font-size:12px;color:rgba(255,255,255,.38);transition:color .25s}   /* заготовка: ссылка на разработчика, светлая и тихая */
   .foot__dev:hover{color:rgba(255,255,255,.75)}
 
+  /* ================= адаптив ================= */
+  .m-only{display:none}
+  .mcards:empty{display:none}
+  /* карточки направлений: на узком экране JS переносит их сюда из сцены — в 3D-полёте на телефоне они не читаются */
+  .mcards{padding:8px 20px 48px;background:#fff}
+  .mcards .cards{position:static;transform:none;width:auto;display:flex;flex-direction:column;gap:14px;perspective:none;pointer-events:auto}
+  .mcards .dir{opacity:1!important;transform:none!important;border-radius:24px;padding:12px 12px 22px}
+  .mcards .dir .back{display:none}
+  .mcards .dir .pic{aspect-ratio:16/10}
+  .mcards .dir .n{font-size:24px}
+
+  /* узкий десктоп и планшет-ландшафт */
+  @media (max-width:1240px){
+    .hero__t h1{font-size:68px}
+    .hero__t{width:min(560px,52vw)}
+    .fact b{font-size:104px}
+    .f-plate .fact{max-width:min(520px,54vw)}
+    .final h2{font-size:56px}
+    .phrase{font-size:44px}
+    .pr__head h2{font-size:56px}
+    .pr__lbl{font-size:22px}
+    .ct__l h2{font-size:46px}
+    .dir .n{font-size:24px}
+    .top nav{gap:26px}
+  }
+
+  /* планшет */
+  @media (max-width:980px){
+    .top{height:72px;padding:0 24px}
+    .page{padding-top:72px}
+    .stick{top:calc(72px * (1 - var(--k,0)));height:calc(100svh - 72px * (1 - var(--k,0)));min-height:0}
+    .top .logo{font-size:24px}
+    .top nav{gap:20px}
+    .top nav a{font-size:14px}
+    .top .r{gap:12px}
+    .top .r .tel{display:none}
+    .page{--gutter:40px}
+    .hero__t{top:80px;width:min(460px,56vw)}
+    .hero__t h1{font-size:52px}
+    .hero__cos{gap:8px;margin-top:26px;flex-wrap:wrap}
+    .hero__cos span{height:40px;padding:0 16px;font-size:12px}
+    .hero__b{margin-top:26px}
+    .pill{height:54px;padding:0 26px;font-size:15px}
+    .fact{top:150px}
+    .fact b{font-size:76px}
+    .fact span{font-size:18px}
+    .f-plate .fact{padding:20px 24px 22px;border-radius:22px;max-width:min(420px,60vw)}
+    .final{padding-top:130px}
+    .final h2{font-size:44px}
+    .final p{font-size:14px}
+    .cards{width:calc(100vw - 32px);gap:12px}
+    .dir{border-radius:24px;padding:12px 12px 20px;gap:12px}
+    .dir .n{font-size:20px}
+    .dir .tags span{padding:7px 11px;font-size:12px}
+    .dir a{padding:8px 14px;font-size:12px}
+    .quote__stick{padding:120px 0 150px;min-height:calc(100svh + 40px)}
+    .quote .phrase,.quote .q-foot{margin-left:40px;margin-right:40px}
+    .phrase{font-size:34px}
+    .pr__head{max-width:min(340px,42vw)}
+    .pr__head h2{font-size:44px}
+    .pr__head .sub{font-size:15px}
+    .pr__lbl{font-size:17px;white-space:normal;max-width:36vw;line-height:1.15}
+    .ct{padding:72px 40px 56px;gap:36px 40px}
+    .ct__l h2{font-size:38px}
+    .ct__map{height:300px}
+    .foot{padding:20px 40px;font-size:12px;gap:16px}
+    .foot__l{gap:12px}
+  }
+
+  /* мобильный */
+  @media (max-width:640px){
+    .top{height:64px;padding:0 20px}
+    .page{padding-top:64px;--gutter:20px}
+    .journey{height:400vh}          /* на телефоне путь короче: 4 экрана свайпа вместо 5.6 */
+    .pr__space{height:150vh}
+    .stick{top:calc(64px * (1 - var(--k,0)));height:calc(100svh - 64px * (1 - var(--k,0)));padding:0 calc(12px * (1 - var(--k,0))) calc(10px * (1 - var(--k,0)))}
+    .plate{border-radius:calc(24px * (1 - var(--k,0)))}
+    .top .logo{font-size:22px}
+    .top .r .pill{display:none}
+    .burger{display:block}
+    /* панель меню */
+    .top nav{position:fixed;left:0;right:0;top:64px;flex-direction:column;gap:0;background:#fff;color:var(--ink);padding:8px 20px 24px;transform:translateY(-130%);transition:transform .35s cubic-bezier(.4,0,.2,1);box-shadow:0 24px 40px rgba(20,20,26,.10);pointer-events:none}
+    .open .top nav{transform:none;pointer-events:auto}
+    .top nav a{font-family:'Unbounded',sans-serif;font-weight:600;font-size:20px;letter-spacing:-.02em;opacity:1;padding:16px 0;border-bottom:1px solid var(--line)}
+    .top nav a::after{display:none}
+    .m-only{display:block}
+    .m-tel{font-family:'Manrope',sans-serif!important;font-size:16px!important;font-weight:600!important}
+    .m-btn{border:0;margin-top:16px;background:var(--c1);color:#fff;border-radius:999px;text-align:center;font-size:15px!important;padding:16px 20px!important;font-family:'Manrope',sans-serif!important}
+    .onblue .top nav,.onwhite .top nav{color:var(--ink)}
+
+    .hero__t{position:absolute;left:20px;right:20px;top:64px;width:auto}
+    .hero__t .eyebrow{font-size:11px;letter-spacing:.14em;margin-bottom:16px}
+    .hero__t h1{font-size:38px}
+    .hero__cos{margin-top:20px;gap:6px}
+    .hero__cos span{height:34px;padding:0 12px;font-size:11px;gap:7px}
+    .hero__cos i{width:8px;height:8px}
+    .hero__b{margin-top:22px}
+    .pill{height:50px;padding:0 24px;font-size:15px}
+    .hero__foot{left:20px;right:20px;width:auto;height:52px;font-size:11px}
+    .hero__foot span:last-child{display:none}
+
+    .fact{top:auto;bottom:24px;left:20px;right:20px;max-width:none}
+    .fact--r{left:20px;right:20px;text-align:left}
+    .fact--r span{margin-left:0}
+    .fact b{font-size:54px}
+    .fact span{font-size:15px;margin-top:8px;max-width:none}
+    .fact small{margin-top:8px;font-size:10px}
+    .f-plate .fact{width:auto;max-width:none;padding:16px 18px 18px;border-radius:18px}
+
+    .final{padding-top:132px}
+    .final h2{font-size:30px;max-width:11ch}
+    .final p{margin-top:14px;font-size:13px}
+
+    .quote__stick{padding:88px 0 104px;min-height:calc(100svh + 20px)}
+    .quote__space{height:16vh}
+    .quote .phrase,.quote .q-foot{margin-left:20px;margin-right:20px}
+    .phrase{font-size:26px;line-height:1.16}
+    .phrase .b{width:1em;height:1em;margin:0 .1em}
+    .q-foot{margin-top:28px;font-size:14px}
+    .q-foot b{font-size:18px}
+    .quote__bg{left:calc(12px * (1 - var(--qk,0)));right:calc(12px * (1 - var(--qk,0)));top:calc(12px * (1 - var(--qk,0)));bottom:calc(12px * (1 - var(--qk,0)));border-radius:calc(24px * (1 - var(--qk,0)))}
+
+    .pr__head{position:absolute;left:20px;right:20px;top:72px;transform:none;max-width:none;text-align:center}
+    .pr__head h2{font-size:34px}
+    .pr__head .sub{font-size:14px;margin-top:14px;max-width:none}
+    .pr__lbl{font-size:13px;white-space:normal;max-width:50vw;gap:7px;line-height:1.15}
+    .pr__lbl small{font-size:10px}
+
+    .ct{border-radius:28px 28px 0 0;padding:48px 20px 40px;grid-template-columns:1fr;gap:28px}
+    .ct__l{gap:24px}
+    .ct__l h2{font-size:30px}
+    .ct__list{gap:16px}
+    .ct__list div div{font-size:17px}
+    .in{height:54px;font-size:15px}
+    textarea.in{height:140px}
+    .ct__f .pill{width:100%;padding:0}
+    .ct__map{height:240px;border-radius:16px}
+    .ct__map-open{left:10px;bottom:10px;padding:8px 12px;font-size:12px}
+    .foot{flex-direction:column;align-items:flex-start;gap:14px;padding:24px 20px 28px;font-size:12px}
+    .foot__l{flex-direction:column;align-items:flex-start;gap:6px}
+    .foot__c{flex-wrap:wrap;gap:8px}
+    .ctl{display:none!important}
+  }
+
+  /* мобильный ландшафт: сцена низкая, текст компактнее */
+  @media (max-width:900px) and (orientation:landscape) and (max-height:520px){
+    .hero__t h1{font-size:30px}
+    .hero__cos,.hero__foot{display:none}
+    .fact b{font-size:44px}
+    .final h2{font-size:28px}
+  }
+
   .ref .top,.ref .hero__t,.ref .hero__foot,.ref .ctl,.ref .note,.ref .nums,.ref .vignette{display:none!important}
   .ref .page{width:100vw}.ref .journey{height:100vh}.ref .stick{position:static;height:100vh;padding:0;min-height:0}.ref .plate{border-radius:0}
 </style>
 
 <div class="page">
   <header class="top">
-    <div class="logo">STRONG</div>
-    <nav><a href="#">Направления</a><a href="#">Принципы</a><a href="#">Контакты</a></nav>
-    <div class="r"><a class="tel" href="tel:+74957880680">+7 (495) 788-0680</a><a class="pill" href="#">Напишите нам письмо!</a></div>
+    <a class="logo" href="#" data-go="top">STRONG</a>
+    <nav id="nav"><a href="#" data-go="dirs">Направления</a><a href="#" data-go="prs">Принципы</a><a href="#" data-go="ct">Контакты</a><a class="m-only m-tel" href="tel:+74957880680">+7 (495) 788-0680</a><a class="m-only m-btn" href="#" data-go="ct">Напишите нам письмо!</a></nav>
+    <div class="r"><a class="tel" href="tel:+74957880680">+7 (495) 788-0680</a><a class="pill" href="#" data-go="ct">Напишите нам письмо!</a>
+      <button class="burger" id="burger" aria-label="Меню" aria-expanded="false"><span></span><span></span></button></div>
   </header>
 
   <section class="journey" id="journey">
@@ -220,7 +384,7 @@
           </div>
           <div class="hero__b"><a class="pill pill--ink" href="#">Напишите нам письмо!</a></div>
         </div>
-        <div class="hero__foot" id="heroF"><span class="scroll">Листайте вниз ↓</span><span>member of igronik group</span></div>
+        <div class="hero__foot" id="heroF"><span class="scroll">Скролл<i>↓</i></span><span>member of igronik group</span></div>
 
         <div class="fact fact--r" data-z="-6"><b style="color:var(--c6)">25</b><span>лет на рынке</span></div>
         <div class="fact" data-z="-20"><b style="color:var(--c3)">№1</b><span>по качеству медиазакупок</span></div>
@@ -246,6 +410,8 @@
   </section>
 
 
+
+  <section class="mcards" id="mcards"></section>
 
   <section class="quote">
     <div class="quote__stick">
@@ -309,6 +475,38 @@
 })();
 </script>
 
+<script>
+/* узкий экран определяем один раз: карточки физически переезжают в DOM, поэтому менять решение на лету нельзя */
+window.NARROW = innerWidth <= 640;
+if (window.NARROW) document.getElementById('mcards').appendChild(document.getElementById('cards'));
+/* меню: плавный переход к разделу и подсветка активного (разделы живут внутри sticky-сцен, поэтому позиции считаем) */
+(function () {
+  var page = document.querySelector('.page'), nav = document.getElementById('nav'), burger = document.getElementById('burger');
+  function targets() {
+    var j = document.getElementById('journey'), pr = document.getElementById('pjourney'), ct = document.querySelector('.ct');
+    var jTotal = j.offsetHeight - (innerHeight - 84);
+    return { top: 0, dirs: j.offsetTop - 84 + jTotal * 0.985, prs: pr.offsetTop + innerHeight * 0.55, ct: pr.offsetTop + ct.offsetTop - 60 };
+  }
+  document.querySelectorAll('[data-go]').forEach(function (a) {
+    a.addEventListener('click', function (e) {
+      e.preventDefault();
+      page.classList.remove('open'); if (burger) burger.setAttribute('aria-expanded', 'false');
+      window.scrollTo({ top: targets()[a.dataset.go], behavior: 'smooth' });
+    });
+  });
+  if (burger) burger.addEventListener('click', function () {
+    var on = page.classList.toggle('open');
+    burger.setAttribute('aria-expanded', on ? 'true' : 'false');
+  });
+  var links = nav ? [].slice.call(nav.children) : [];
+  addEventListener('scroll', function () {
+    var t = targets(), y = scrollY + innerHeight * 0.35, cur = '';
+    if (y >= t.ct) cur = 'ct'; else if (y >= t.prs) cur = 'prs'; else if (y >= t.dirs) cur = 'dirs';
+    links.forEach(function (a) { a.classList.toggle('on', a.dataset.go === cur); });
+  }, { passive: true });
+})();
+</script>
+
 <script type="importmap">
 { "imports": {
   "three": "./vendor/three.module.js",
@@ -333,14 +531,15 @@ const final2 = document.getElementById('final2'), h2dirs = document.getElementBy
 const variant = { facts: 'plate', gates: 'floor' };
 plate.classList.add('f-plate');
 const pageEl = document.querySelector('.page');
-pageEl.classList.add('menu-a');
+
 const cardL = document.querySelector('.dir[data-side=l]'), cardC = document.querySelector('.dir[data-side=c]'), cardR = document.querySelector('.dir[data-side=r]');
 const WHITE = new THREE.Color(0xFFFFFF), INK = new THREE.Color(0x14141A);
 
 let renderer;
 try { renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' }); }   // прозрачный: за сценой лежит слово STRONG
 catch (e) { document.getElementById('fallback').style.display = 'flex'; throw e; }
-renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));   // FPS: ретина не выше 1.5
+const MOB = matchMedia('(max-width:980px)').matches;
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, MOB ? 1 : 1.5));   // FPS: ретина не выше 1.5, на телефоне 1
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFShadowMap;                          // FPS: PCFSoft заметно дороже
 renderer.toneMapping = THREE.NoToneMapping;
@@ -364,7 +563,7 @@ const camera = new THREE.PerspectiveCamera(28, 2, 0.05, 260);
 scene.add(new THREE.HemisphereLight(0xfff8ee, 0xd9cbb2, 0.42));
 const key = new THREE.DirectionalLight(0xfff4e6, 1.55);
 key.castShadow = true;
-key.shadow.mapSize.set(1024, 1024);
+key.shadow.mapSize.set(MOB ? 512 : 1024, MOB ? 512 : 1024);
 key.shadow.camera.near = 1; key.shadow.camera.far = 120;
 key.shadow.camera.left = -40; key.shadow.camera.right = 40;
 key.shadow.camera.top = 40; key.shadow.camera.bottom = -40;
@@ -507,6 +706,14 @@ function bgAt(z) {
 }
 
 /* ---------- размер ---------- */
+const NARROW = !!window.NARROW;
+/* узкий экран: расширяем угол так, чтобы по горизонтали влезало столько же, сколько на десктопе (2.0) */
+function fovFor(base) {
+  const A = 2.0;
+  if (camera.aspect >= A) return base;
+  const t = Math.tan(THREE.MathUtils.degToRad(base) / 2) * (A / camera.aspect);
+  return Math.min(80, THREE.MathUtils.radToDeg(Math.atan(t) * 2));
+}
 function resize() {
   const w = plate.clientWidth, h = plate.clientHeight;
   renderer.setSize(w, h, false);
@@ -656,13 +863,15 @@ function frame() {
   waveNow = waveK;
   waveEl.style.transform = 'translateY(' + ((1 - waveK) * 100).toFixed(1) + '%) translateY(' + ((1 - waveK) * 16).toFixed(1) + 'vh)';
   h2dirs.style.color = waveK > 0.74 ? '#14141A' : '#fff';   // темнеет, когда кромка волны проходит через заголовок
-  cardC.style.opacity = rise > 0.001 ? '1' : '0';
-  cardC.style.transform = 'translateY(' + ((1 - rise) * 110).toFixed(1) + 'vh) rotateY(' + (spin * 360).toFixed(1) + 'deg)';
-  cardC.classList.toggle('flipped', spin * 360 > 90 && spin * 360 < 270);
-  cardL.style.opacity = sides > 0.001 ? '1' : '0';
-  cardL.style.transform = 'translateX(' + (-(1 - sides) * 60).toFixed(1) + 'vw)';
-  cardR.style.opacity = sides > 0.001 ? '1' : '0';
-  cardR.style.transform = 'translateX(' + ((1 - sides) * 60).toFixed(1) + 'vw)';
+  if (!NARROW) {                                                              // на узком экране карточки живут отдельной секцией, а не в сцене
+    cardC.style.opacity = rise > 0.001 ? '1' : '0';
+    cardC.style.transform = 'translateY(' + ((1 - rise) * 110).toFixed(1) + 'vh) rotateY(' + (spin * 360).toFixed(1) + 'deg)';
+    cardC.classList.toggle('flipped', spin * 360 > 90 && spin * 360 < 270);
+    cardL.style.opacity = sides > 0.001 ? '1' : '0';
+    cardL.style.transform = 'translateX(' + (-(1 - sides) * 60).toFixed(1) + 'vw)';
+    cardR.style.opacity = sides > 0.001 ? '1' : '0';
+    cardR.style.transform = 'translateX(' + ((1 - sides) * 60).toFixed(1) + 'vw)';
+  }
   finalEl.style.opacity = fa.toFixed(3);
   finalEl.style.transform = 'translateY(calc(' + ((1 - fa) * 24).toFixed(1) + 'px - ' + (exit1 * 120).toFixed(1) + 'vh))';   // первый заголовок уходит сам, не дожидаясь второго
   const bg = bgAt(bz);
@@ -680,12 +889,13 @@ function frame() {
   sats.forEach(({ a, s }) => { a.getWorldPosition(_p); s.position.copy(_p); s.scale.setScalar(Math.max(0.001, 1 - k * 1.6)); s.visible = k < 0.6; });
 
   /* камера: 3/4 на кольцо → низко, за шаром, под большой аркой */
-  const cam0 = _p.set(cur.x * 0.9, 8.9 - cur.y * 0.4, 23.5), look0 = _p2.set(0.6, 8.2, 0);
-  const cam1 = new THREE.Vector3(bx * 0.5 + 3.0 * (1 - endK) + bx * 0.5 * endK + cur.x * 0.9 * mouseK, 1.15 + 0.5 * endK - cur.y * 0.25 * mouseK, bz + CAM_BACK);
-  const look1 = new THREE.Vector3((pathX(bz - 9) * 0.6 - 1.2) * (1 - endK) + bx * endK, 4.6 - 3.3 * endK, bz - 9);   // на пути камера смотрит выше: мяч и ворота уходят вниз, цифры ближе к середине; в финале прежняя раскадровка
+  /* на узком экране: камера дальше, смотрит выше колец — текст сверху, скульптура в нижней половине */
+  const cam0 = _p.set((NARROW ? 5.4 : 0) + cur.x * 0.9, 8.9 - cur.y * 0.4, NARROW ? 26 : 23.5), look0 = _p2.set(NARROW ? 5.4 : 0.6, NARROW ? 11.4 : 8.2, 0);
+  const cam1 = new THREE.Vector3(bx * 0.5 + (NARROW ? 0.4 : 3.0) * (1 - endK) + bx * 0.5 * endK + cur.x * 0.9 * mouseK, 1.15 + 0.5 * endK - cur.y * 0.25 * mouseK, bz + (NARROW ? 11.5 : CAM_BACK));
+  const look1 = new THREE.Vector3((pathX(bz - 9) * 0.6 - (NARROW ? 0.2 : 1.2)) * (1 - endK) + bx * endK, (NARROW ? 5.6 : 4.6) - (NARROW ? 4.3 : 3.3) * endK, bz - 9);   // на пути камера смотрит выше: мяч и ворота уходят вниз, цифры ближе к середине; в финале прежняя раскадровка
   camera.position.lerpVectors(cam0, cam1, k);
   camera.lookAt(look0.lerp(look1, k));
-  camera.fov = 28 + (50 - 28) * k; camera.updateProjectionMatrix();
+  camera.fov = fovFor(28 + (50 - 28) * k); camera.updateProjectionMatrix();
 
   key.position.set(bx * k + 4.6 * (1 - k) - 16, 24, bz * k + 10);
   key.target.position.set(bx * k + 4.6 * (1 - k), 0, bz * k - 10);
@@ -797,6 +1007,7 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
 /* принципы: конус из шести брусьев крест-накрест, снизу вверх всё короче, сверху куб. Снизу — «Честность» */
 const plate = document.getElementById('pplate'), canvas = document.getElementById('pgl'), journey = document.getElementById('pjourney'), ctTail = document.querySelector('.ct'), footTail = document.querySelector('.foot');
 const prIn = document.getElementById('prin'), pageEl = document.querySelector('.page');
+const NARROW = !!window.NARROW;   // объявляем до камеры и конуса: они на узком экране настраиваются иначе
 const labels = [...document.querySelectorAll('.pr__lbl')];
 const forced = new URLSearchParams(location.search).get('pp');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
@@ -805,7 +1016,8 @@ renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFShadowMap;
 renderer.toneMapping = THREE.NoToneMapping; renderer.outputColorSpace = THREE.SRGBColorSpace;
 const scene = new THREE.Scene();
 scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(renderer), 0.04).texture;
-const camera = new THREE.PerspectiveCamera(30, 2, 0.1, 100); camera.position.set(0, 0.8, 26); camera.lookAt(0, 0, 0);
+const camera = new THREE.PerspectiveCamera(30, 2, 0.1, 100); camera.position.set(0, 0.8, NARROW ? 30 : 26); camera.lookAt(0, 0, 0);
+function pFov(base) { const A = 2.0; if (camera.aspect >= A) return base; const t = Math.tan(THREE.MathUtils.degToRad(base) / 2) * (A / camera.aspect); return Math.min(72, THREE.MathUtils.radToDeg(Math.atan(t) * 2)); }
 scene.add(new THREE.HemisphereLight(0xfff8ee, 0xd9cbb2, 0.45));
 const key = new THREE.DirectionalLight(0xfff4e6, 1.5); key.position.set(-6, 12, 40); key.castShadow = true;   // почти фронтально — тень на стене короткая
 key.shadow.mapSize.set(1024, 1024); key.shadow.camera.left = key.shadow.camera.bottom = -20; key.shadow.camera.right = key.shadow.camera.top = 20; key.shadow.radius = 5; key.shadow.normalBias = 0.04;
@@ -819,7 +1031,14 @@ const matte = (hex) => new THREE.MeshPhysicalMaterial({ color: new THREE.Color(h
 const COLORS = [0x2F5776, 0x2E6B33, 0xC39433, 0xC87B2E, 0xC0453E, 0x14141A];
 const LEN = [6.0, 5.1, 4.2, 3.3, 2.5, 1.8];
 const T = 1.15, STEP = T + 0.06;
-const group = new THREE.Group(); group.position.set(4.6, 0, 0); scene.add(group);
+const group = new THREE.Group(); scene.add(group);
+let spreadX = 4.6;                                        // насколько слои уезжают влево при разборе
+function place() {                                        // раскладка по ширине плашки: справа должно хватать места подписям
+  const w = plate.clientWidth;
+  if (w <= 640) { group.position.set(-1.9, -2.2, 0); group.scale.setScalar(0.82); spreadX = 1.8; }
+  else if (w <= 1100) { group.position.set(2.6, 0, 0); group.scale.setScalar(0.76); spreadX = 3.4; }   // планшет: правее и мельче, чтобы не лезть на заголовок
+  else { group.position.set(4.6, 0, 0); group.scale.setScalar(1); spreadX = 4.6; }
+}
 const parts = COLORS.map((hex, i) => {
   const isTop = i === 5;
   const geo = isTop ? new RoundedBoxGeometry(1.8, 1.8, 1.8, 4, 0.18) : new RoundedBoxGeometry(LEN[i], T, LEN[i] * 0.55, 4, 0.14);
@@ -827,7 +1046,7 @@ const parts = COLORS.map((hex, i) => {
   const y0 = -3.0 + i * STEP + (isTop ? 0.32 : 0);
   return { m, y0, yaw: (i % 2) * Math.PI / 2, i };
 });
-function resize() { const w = plate.clientWidth, h = plate.clientHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); }
+function resize() { const w = plate.clientWidth, h = plate.clientHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.fov = pFov(30); camera.updateProjectionMatrix(); place(); }
 resize(); window.addEventListener('resize', resize);
 const ANIM = 1.4, HOLD = 0.5;                              // разбор-пауза-сбор — первые 140vh, потом 50vh пауза собранным; дальше контакты едут поверх
 function progress() { if (forced !== null) return Math.min(1, Math.max(0, parseFloat(forced))); const r = journey.getBoundingClientRect(); return Math.min(1, Math.max(0, -r.top / (ANIM * innerHeight))); }
@@ -864,13 +1083,13 @@ function frame() {
   group.rotation.x = 0.18 * (1 - K) + cur.y * 0.06;
   const GAP = 1.7;                                          // расстояние между разведёнными слоями
   /* общая вертикаль подписей: правый край самого большого слоя в разобранном виде */
-  _v.set(LEN[0] * 0.5 * 0.66 + 1.9, 0, 0); parts[0].m.localToWorld(_v); _v.project(camera);   // +0.7 — зазор от синего бруса до цифры
+  _v.set(LEN[0] * 0.5 * 0.66 + (plate.clientWidth <= 640 ? 0.9 : 1.9), 0, 0); parts[0].m.localToWorld(_v); _v.project(camera);   // зазор от синего бруса до цифры
   const labelX = (_v.x * 0.5 + 0.5) * plate.clientWidth;
   parts.forEach((pt) => {
     const ki = smooth(Math.min(1, Math.max(0, (K * 1.5 - pt.i * 0.1) / 0.5)));          // очередь: нижний слой уходит первым
     pt.m.position.y = pt.y0 * (1 - ki) + (pt.i - 2.5) * GAP * ki;                    // разобранные слои стоят ровной колонкой по центру
     pt.m.rotation.y = pt.yaw * (1 - ki) + (pt.i % 2 ? 0.35 : -0.35) * ki;             // разобранные слои поворачиваются длинной стороной к зрителю
-    pt.m.position.x = -ki * 4.6;                                                     // разобранные слои сдвигаются влево, освобождая место подписям
+    pt.m.position.x = -ki * spreadX;                                                 // разобранные слои сдвигаются влево, освобождая место подписям
     pt.m.scale.setScalar(1 - 0.34 * ki);
     pt.m.getWorldPosition(_v); _v.project(camera);
     const y = (-_v.y * 0.5 + 0.5) * plate.clientHeight;
