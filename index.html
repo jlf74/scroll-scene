@@ -292,7 +292,7 @@
   @media (max-width:640px){
     .top{height:64px;padding:0 20px}
     .page{padding-top:64px;--gutter:20px}
-    .journey{height:400vh}          /* на телефоне путь короче: 4 экрана свайпа вместо 5.6 */
+    .journey{height:290vh}          /* на телефоне путь короче: заголовок «Направления», волна и сразу карточки */
     .pr__space{height:150vh}
     .stick{top:calc(64px * (1 - var(--k,0)));height:calc(100svh - 64px * (1 - var(--k,0)));padding:0 calc(12px * (1 - var(--k,0))) calc(10px * (1 - var(--k,0)))}
     .plate{border-radius:calc(24px * (1 - var(--k,0)))}
@@ -328,11 +328,11 @@
     .fact small{margin-top:8px;font-size:10px}
     .f-plate .fact{width:auto;max-width:none;padding:16px 18px 18px;border-radius:18px}
 
-    .final{padding-top:132px}
-    .final h2{font-size:30px;max-width:11ch}
-    .final p{margin-top:14px;font-size:13px}
+    .final{padding-top:186px}
+    .final h2{font-size:32px;max-width:11ch}
+    .final p{margin-top:14px;font-size:14px}
 
-    .quote__stick{padding:88px 0 104px;min-height:calc(100svh + 20px)}
+    .quote__stick{padding:84px 0 84px;min-height:100svh;justify-content:center}
     .quote__space{height:16vh}
     .quote .phrase,.quote .q-foot{margin-left:20px;margin-right:20px}
     .phrase{font-size:26px;line-height:1.16}
@@ -341,15 +341,15 @@
     .q-foot b{font-size:18px}
     .quote__bg{left:calc(12px * (1 - var(--qk,0)));right:calc(12px * (1 - var(--qk,0)));top:calc(12px * (1 - var(--qk,0)));bottom:calc(12px * (1 - var(--qk,0)));border-radius:calc(24px * (1 - var(--qk,0)))}
 
-    .pr__head{position:absolute;left:20px;right:20px;top:72px;transform:none;max-width:none;text-align:center}
-    .pr__head h2{font-size:34px}
+    .pr__head{position:absolute;left:20px;right:20px;top:64px;transform:none;max-width:none;text-align:center}
+    .pr__head h2{font-size:32px}
     .pr__head .sub{font-size:14px;margin-top:14px;max-width:none}
-    .pr__lbl{font-size:13px;white-space:normal;max-width:50vw;gap:7px;line-height:1.15}
+    .pr__lbl{font-size:15px;white-space:normal;max-width:50vw;gap:8px;line-height:1.16}
     .pr__lbl small{font-size:10px}
 
     .ct{border-radius:28px 28px 0 0;padding:48px 20px 40px;grid-template-columns:1fr;gap:28px}
     .ct__l{gap:24px}
-    .ct__l h2{font-size:30px}
+    .ct__l h2{font-size:32px}
     .ct__list{gap:16px}
     .ct__list div div{font-size:17px}
     .in{height:54px;font-size:15px}
@@ -843,10 +843,10 @@ function frame() {
   const exit1 = smooth(Math.min(1, Math.max(0, (q - 0.12) / 0.14)));           // пауза: мяч докатился и висит с заголовком, потом заголовок уходит сам
   const shrink = smooth(Math.min(1, Math.max(0, (q - 0.14) / 0.14)));          // мяч уменьшается на месте
   const h2in = smooth(Math.min(1, Math.max(0, (q - 0.16) / 0.26)));             // второй заголовок едет снизу сразу за первым
-  const pushVh = Math.max(0, h2in * 100 - (100 - 68 + 190 / plate.clientHeight * 100)) * 1.05;   // верх заголовка = 190px + (1−h2in)·100vh; низ сжатого мяча стоит на 68vh (замер) → контакт при h2in≈0.52, дальше мяч едет чуть быстрее заголовка, не отрываясь
+  const pushVh = Math.max(0, h2in * 100 - (100 - (NARROW ? 42 : 68) + (NARROW ? 250 : 190) / plate.clientHeight * 100)) * 1.05;   // верх заголовка = 190px + (1−h2in)·100vh; низ сжатого мяча стоит на 68vh (замер) → контакт при h2in≈0.52, дальше мяч едет чуть быстрее заголовка, не отрываясь
   const VH = 0.0746;                                                          // 1vh в мировых единицах на дистанции мяча
   ball.scale.setScalar((CORE_R * (1 - k) + BALL_R * k) * (1 - 0.5 * shrink));
-  ball.position.y += endK * 0.7 - shrink * 0.5 * BALL_R + pushVh * VH;         // под заголовок (подъём 0.7, чтобы не лезть на подпись) → сжался (низ на месте) → выталкивание
+  ball.position.y += endK * (NARROW ? 3.1 : 0.7) - shrink * 0.5 * BALL_R + pushVh * VH;         // под заголовок (подъём 0.7, чтобы не лезть на подпись) → сжался (низ на месте) → выталкивание
   ball.visible = pushVh < 70;
   ball.rotation.x = -(BALL_Z0 - bz) / BALL_R;
   ball.rotation.y += dt * speed * 0.08 * (1 - k);
@@ -865,14 +865,16 @@ function frame() {
   facts.forEach((f) => {
     const d = bz - f.z;
     const gate = smooth(Math.min(1, Math.max(0, (p - 0.17) / 0.06)));                     // не раньше, чем ушёл текст обложки
-    const a = gate * smooth(Math.min(1, Math.max(0, (12 - d) / 5))) * (1 - smooth(Math.min(1, Math.max(0, (-d - 1) / 4))));
+    const a = NARROW
+      ? gate * smooth(Math.min(1, Math.max(0, (16 - d) / 4))) * (1 - smooth(Math.min(1, Math.max(0, (5 - d) / 2.5))))   // на узком экране цифры в одном месте внизу: показываем раньше и гасим до ворот, иначе последняя попадает на синий финал
+      : gate * smooth(Math.min(1, Math.max(0, (12 - d) / 5))) * (1 - smooth(Math.min(1, Math.max(0, (-d - 1) / 4))));
     f.el.style.opacity = a.toFixed(3);
     f.el.style.transform = 'translateY(' + ((1 - a) * 28).toFixed(1) + 'px)';
   });
   const fa = smooth(Math.min(1, Math.max(0, (-51 - bz) / 7)));
   /* второй заголовок и карточки */
-  const rise = smooth(Math.min(1, Math.max(0, (q - 0.3) / 0.14)));              // карточка идёт сразу за заголовком
-  const waveK = smooth(Math.min(1, Math.max(0, (q - 0.35) / 0.2)));             // белая волна сразу за ней
+  const rise = smooth(Math.min(1, Math.max(0, (q - (NARROW ? 0.34 : 0.3)) / 0.14)));              // карточка идёт сразу за заголовком
+  const waveK = smooth(Math.min(1, Math.max(0, (q - (NARROW ? 0.36 : 0.35)) / (NARROW ? 0.12 : 0.2))));             // белая волна сразу за ней
   const spin = smooth(Math.min(1, Math.max(0, (q - 0.52) / 0.34)));             // оборот длиннее
   const sides = smooth(Math.min(1, Math.max(0, (q - 0.5) / 0.2)));              // боковые выезжают с началом оборота и висят, пока он идёт
   final2.style.opacity = q > 0.2 ? '1' : '0';
@@ -907,7 +909,7 @@ function frame() {
 
   /* камера: 3/4 на кольцо → низко, за шаром, под большой аркой */
   /* на узком экране: камера дальше, смотрит выше колец — текст сверху, скульптура в нижней половине */
-  const cam0 = _p.set((NARROW ? 5.4 : 0) + cur.x * 0.9, 8.9 - cur.y * 0.4, NARROW ? 26 : 23.5), look0 = _p2.set(NARROW ? 5.4 : 0.6, NARROW ? 11.4 : 8.2, 0);
+  const cam0 = _p.set((NARROW ? 5.4 : 0) + cur.x * 0.9, 8.9 - cur.y * 0.4, NARROW ? 19.5 : 23.5), look0 = _p2.set(NARROW ? 5.4 : 0.6, NARROW ? 12.4 : 8.2, 0);   // на телефоне камера ближе: скульптура крупная, занимает низ экрана
   const cam1 = new THREE.Vector3(bx * 0.5 + (NARROW ? 0.4 : 3.0) * (1 - endK) + bx * 0.5 * endK + cur.x * 0.9 * mouseK, 1.15 + 0.5 * endK - cur.y * 0.25 * mouseK, bz + (NARROW ? 11.5 : CAM_BACK));
   const look1 = new THREE.Vector3((pathX(bz - 9) * 0.6 - (NARROW ? 0.2 : 1.2)) * (1 - endK) + bx * endK, (NARROW ? 5.6 : 4.6) - (NARROW ? 4.3 : 3.3) * endK, bz - 9);   // на пути камера смотрит выше: мяч и ворота уходят вниз, цифры ближе к середине; в финале прежняя раскадровка
   camera.position.lerpVectors(cam0, cam1, k);
@@ -1033,7 +1035,7 @@ renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFShadowMap;
 renderer.toneMapping = THREE.NoToneMapping; renderer.outputColorSpace = THREE.SRGBColorSpace;
 const scene = new THREE.Scene();
 scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(renderer), 0.04).texture;
-const camera = new THREE.PerspectiveCamera(30, 2, 0.1, 100); camera.position.set(0, 0.8, NARROW ? 30 : 26); camera.lookAt(0, 0, 0);
+const camera = new THREE.PerspectiveCamera(30, 2, 0.1, 100); camera.position.set(0, 0.8, NARROW ? 26 : 26); camera.lookAt(0, 0, 0);
 function pFov(base) { const A = 2.0; if (camera.aspect >= A) return base; const t = Math.tan(THREE.MathUtils.degToRad(base) / 2) * (A / camera.aspect); return Math.min(72, THREE.MathUtils.radToDeg(Math.atan(t) * 2)); }
 scene.add(new THREE.HemisphereLight(0xfff8ee, 0xd9cbb2, 0.45));
 const key = new THREE.DirectionalLight(0xfff4e6, 1.5); key.position.set(-6, 12, 40); key.castShadow = true;   // почти фронтально — тень на стене короткая
@@ -1052,7 +1054,7 @@ const group = new THREE.Group(); scene.add(group);
 let spreadX = 4.6;                                        // насколько слои уезжают влево при разборе
 function place() {                                        // раскладка по ширине плашки: справа должно хватать места подписям
   const w = plate.clientWidth;
-  if (w <= 640) { group.position.set(-1.9, -2.2, 0); group.scale.setScalar(0.82); spreadX = 1.8; }
+  if (w <= 640) { group.position.set(-3.1, 0, 0); group.scale.setScalar(0.95); spreadX = 1.0; }   // на телефоне слои крупные, левее — справа подписи
   else if (w <= 1100) { group.position.set(2.6, 0, 0); group.scale.setScalar(0.76); spreadX = 3.4; }   // планшет: правее и мельче, чтобы не лезть на заголовок
   else { group.position.set(4.6, 0, 0); group.scale.setScalar(1); spreadX = 4.6; }
 }
@@ -1098,16 +1100,16 @@ function frame() {
   cur.x += (target.x - cur.x) * 0.05; cur.y += (target.y - cur.y) * 0.05;
   group.rotation.y = 0.7 * (1 - K * 0.8) + cur.x * 0.12 + Math.sin(t * 0.3) * 0.05;   // собранный конус на три четверти, разобранный почти фронтально
   group.rotation.x = 0.18 * (1 - K) + cur.y * 0.06;
-  const GAP = 1.7;                                          // расстояние между разведёнными слоями
+  const GAP = plate.clientWidth <= 640 ? 3.1 : 1.7;          // расстояние между разведёнными слоями; на телефоне колонка на весь экран
   /* общая вертикаль подписей: правый край самого большого слоя в разобранном виде */
-  _v.set(LEN[0] * 0.5 * 0.66 + (plate.clientWidth <= 640 ? 0.9 : 1.9), 0, 0); parts[0].m.localToWorld(_v); _v.project(camera);   // зазор от синего бруса до цифры
+  _v.set(LEN[0] * 0.5 * 0.66 + (plate.clientWidth <= 640 ? 1.1 : 1.9), 0, 0); parts[0].m.localToWorld(_v); _v.project(camera);   // зазор от синего бруса до цифры
   const labelX = (_v.x * 0.5 + 0.5) * plate.clientWidth;
   parts.forEach((pt) => {
     const ki = smooth(Math.min(1, Math.max(0, (K * 1.5 - pt.i * 0.1) / 0.5)));          // очередь: нижний слой уходит первым
     pt.m.position.y = pt.y0 * (1 - ki) + (pt.i - 2.5) * GAP * ki;                    // разобранные слои стоят ровной колонкой по центру
     pt.m.rotation.y = pt.yaw * (1 - ki) + (pt.i % 2 ? 0.35 : -0.35) * ki;             // разобранные слои поворачиваются длинной стороной к зрителю
     pt.m.position.x = -ki * spreadX;                                                 // разобранные слои сдвигаются влево, освобождая место подписям
-    pt.m.scale.setScalar(1 - 0.34 * ki);
+    pt.m.scale.setScalar(1 - (plate.clientWidth <= 640 ? 0.12 : 0.34) * ki);   // на телефоне слои почти не мельчают — иначе не читаются
     pt.m.getWorldPosition(_v); _v.project(camera);
     const y = (-_v.y * 0.5 + 0.5) * plate.clientHeight;
     const lk = smooth(Math.min(1, Math.max(0, (ki - 0.5) / 0.4)));
