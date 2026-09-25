@@ -225,8 +225,8 @@
   .m-only{display:none}
   .mcards:empty{display:none}
   /* карточки направлений: на узком экране JS переносит их сюда из сцены — в 3D-полёте на телефоне они не читаются */
-  .mcards{padding:8px 20px 48px;background:#fff}
-  .mcards__h{font-family:'Unbounded',sans-serif;font-weight:800;font-size:32px;line-height:1.05;letter-spacing:-.04em;text-align:center;margin:0 0 20px;padding-top:44px}
+  .mcards{padding:12px 20px 48px;background:#fff}
+  .mcards__h{font-family:'Unbounded',sans-serif;font-weight:800;font-size:32px;line-height:1.05;letter-spacing:-.04em;text-align:center;margin:0 0 22px;padding-top:24px}
   .mcards .cards{position:static;transform:none;width:auto;display:flex;flex-direction:column;gap:14px;perspective:none;pointer-events:auto}
   .mcards .dir{opacity:1!important;transform:none!important;border-radius:24px;padding:12px 12px 22px}
   .mcards .dir .back{display:none}
@@ -275,6 +275,7 @@
     .final h2{font-size:44px}
     .final p{font-size:14px}
     .cards{width:calc(100vw - 32px);gap:12px}
+    .final--2{padding-top:clamp(190px, calc(100vh - 640px), 560px)}   /* планшет-портрет: заголовок опускается к карточкам, провала нет */
     .dir{border-radius:24px;padding:12px 12px 20px;gap:12px}
     .dir .n{font-size:20px}
     .dir .tags span{padding:7px 11px;font-size:12px}
@@ -325,16 +326,17 @@
     .hero__foot{left:20px;right:20px;width:auto;height:52px;font-size:11px}
     .hero__foot span:last-child{display:none}
 
-    .fact{top:50%;bottom:auto;left:16px;right:16px;max-width:none;margin-top:-90px}   /* по центру экрана: цифра — главный акцент */
-    .fact--r{left:16px;right:16px;text-align:left}
-    .fact--r span{margin-left:0}
-    .fact b{font-size:64px}
-    .fact span{font-size:17px;margin-top:10px;max-width:none}
+    .fact{top:50%;bottom:auto;left:16px;right:16px;max-width:none;margin-top:-110px;text-align:center}   /* по центру экрана: цифра — главный акцент */
+    .fact--r{left:16px;right:16px;text-align:center}
+    .fact--r span{margin-left:auto;margin-right:auto}
+    .fact span{margin-left:auto;margin-right:auto}
+    .fact b{font-size:84px}
+    .fact span{font-size:18px;margin-top:12px;max-width:22ch}
     .fact small{margin-top:10px;font-size:10px}
-    .f-plate .fact{width:max-content;max-width:calc(100vw - 32px);padding:18px 22px 20px;border-radius:20px}
+    .f-plate .fact{width:auto;max-width:none;padding:26px 22px 28px;border-radius:24px;background:rgba(243,241,234,.93)}
 
     .final{padding-top:186px}
-    .final--2{padding-top:48vh}     /* «Направления группы» — над стыком с карточками, а не в пустоте */
+    .final--2{padding-top:0;top:auto;bottom:15vh;align-items:flex-end;color:var(--ink)}   /* на телефоне заголовок приезжает на белой волне, внизу экрана; карточки — сразу за ним */
     .final h2{font-size:32px;max-width:11ch}
     .final p{margin-top:14px;font-size:14px}
 
@@ -520,15 +522,7 @@
 })();
 /* узкий экран определяем один раз: карточки физически переезжают в DOM, поэтому менять решение на лету нельзя */
 window.NARROW = innerWidth <= 640;
-if (window.NARROW) {
-  var mc = document.getElementById('mcards'), f2 = document.getElementById('final2');
-  var h = document.createElement('h2');                       // заголовок секции карточек вместо экранного в сцене
-  h.className = 'mcards__h';
-  h.innerHTML = f2.querySelector('h2').innerHTML;
-  mc.appendChild(h);
-  f2.remove();
-  mc.appendChild(document.getElementById('cards'));
-}
+if (window.NARROW) document.getElementById('mcards').appendChild(document.getElementById('cards'));
 /* меню: плавный переход к разделу и подсветка активного (разделы живут внутри sticky-сцен, поэтому позиции считаем) */
 (function () {
   var page = document.querySelector('.page'), nav = document.getElementById('nav'), burger = document.getElementById('burger');
@@ -913,13 +907,17 @@ function frame() {
   const waveK = smooth(Math.min(1, Math.max(0, (q - (NARROW ? 0.05 : 0.35)) / (NARROW ? 0.9 : 0.2))));             // белая волна сразу за ней
   const spin = smooth(Math.min(1, Math.max(0, (q - 0.52) / 0.34)));             // оборот длиннее
   const sides = smooth(Math.min(1, Math.max(0, (q - 0.5) / 0.2)));              // боковые выезжают с началом оборота и висят, пока он идёт
-  if (HAS_F2) {
+  if (HAS_F2 && NARROW) {                                                     // телефон: заголовок едет вместе с волной
+    final2.style.opacity = waveK > 0.35 ? '1' : '0';
+    final2.style.transform = 'translateY(' + ((1 - waveK) * 60).toFixed(1) + 'vh)';
+  } else if (HAS_F2) {
     final2.style.opacity = q > 0.2 ? '1' : '0';
     final2.style.transform = 'translateY(' + ((1 - h2in) * 100).toFixed(1) + 'vh)';
   }
   waveNow = waveK;
-  waveEl.style.transform = 'translateY(' + ((1 - waveK) * 100).toFixed(1) + '%) translateY(' + ((1 - waveK) * 16).toFixed(1) + 'vh)';
-  if (HAS_F2) h2dirs.style.color = waveK > 0.74 ? '#14141A' : '#fff';   // темнеет, когда кромка волны проходит через заголовок
+  const wv = NARROW ? waveK * 0.72 : waveK;                                        // на телефоне волна поднимается до 72% — сверху остаётся синий, следующая секция продолжает белое
+  waveEl.style.transform = 'translateY(' + ((1 - wv) * 100).toFixed(1) + '%) translateY(' + ((1 - wv) * 16).toFixed(1) + 'vh)';
+  if (HAS_F2 && !NARROW) h2dirs.style.color = waveK > 0.74 ? '#14141A' : '#fff';   // темнеет, когда кромка волны проходит через заголовок
   if (!NARROW) {                                                              // на узком экране карточки живут отдельной секцией, а не в сцене
     cardC.style.opacity = rise > 0.001 ? '1' : '0';
     cardC.style.transform = 'translateY(' + ((1 - rise) * 110).toFixed(1) + 'vh) rotateY(' + (spin * 360).toFixed(1) + 'deg)';
@@ -935,7 +933,7 @@ function frame() {
   plate.style.backgroundColor = '#' + bg.getHexString(); scene.fog.color.copy(bg);
   floorMat.color.copy(bg).lerp(BEIGE, 0.22).multiplyScalar(0.66);   // с учётом освещения пол выходит в тон фона, чуть бежевее
   const blueK = smooth(Math.min(1, Math.max(0, ((NARROW ? -40 : -40) - bz) / (NARROW ? 13 : 7))));           // в синем финале пол растворяется, остаётся заливка
-  bigword.style.opacity = (0.06 * Math.max(smooth(Math.min(1, Math.max(0, (p - 0.2) / 0.08))) * (1 - blueK), waveNow)).toFixed(3);   // слово появляется с воротами, уходит в синем финале и возвращается с белой волной под карточками
+  bigword.style.opacity = (0.06 * Math.max(smooth(Math.min(1, Math.max(0, (p - 0.2) / 0.08))) * (1 - blueK), NARROW ? 0 : waveNow)).toFixed(3);   // слово появляется с воротами, уходит в синем финале и возвращается с белой волной под карточками
   bigword.style.zIndex = waveNow > 0.01 ? '3' : '0';                             // на белом — над волной (z2), под карточками (z4); на сцене — за арками
   floorMat.opacity = 1 - blueK;
   pageEl.classList.toggle('onblue', blueK > 0.6 && waveNow < 0.85);   // шапка без подложки на синем
