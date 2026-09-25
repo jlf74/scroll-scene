@@ -122,6 +122,7 @@
   .wave i{position:absolute;inset:0;background:#fff;display:block}
   /* второй заголовок и карточки направлений — внутри той же сцены */
   .final--2{color:#fff;will-change:transform,opacity;padding-top:clamp(190px,24vh,420px)}   /* на высоких экранах заголовок ниже: меньше пустоты до карточек */
+  @media (max-width:640px){.final--2{padding-top:46vh}}
   .final{will-change:transform,opacity}
   .cards{position:absolute;left:50%;bottom:20px;z-index:4;width:min(1392px, 100vw - 48px);transform:translate(-50%,0);display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;perspective:1600px;pointer-events:none}
   .cards .dir{pointer-events:auto;opacity:0;will-change:transform,opacity;transform-style:preserve-3d;position:relative}
@@ -227,7 +228,9 @@
   .mcards .cards{position:static;transform:none;width:auto;display:flex;flex-direction:column;gap:14px;perspective:none;pointer-events:auto}
   .mcards .dir{opacity:1!important;transform:none!important;border-radius:24px;padding:12px 12px 22px}
   .mcards .dir .back{display:none}
+  .mcards .dir{overflow:hidden}                                  /* шары выходят за белое поле, но не за карточку — иначе боковой скролл */
   .mcards .dir .pic{aspect-ratio:16/10}
+  .mcards .dir .pic canvas{left:-8%;right:-8%;top:-18%;bottom:-8%;width:116%;height:126%}
   .mcards .dir .n{font-size:24px}
 
   /* узкий десктоп и планшет-ландшафт */
@@ -292,10 +295,10 @@
   @media (max-width:640px){
     .top{height:64px;padding:0 20px}
     .page{padding-top:64px;--gutter:20px}
-    .journey{height:290vh}          /* на телефоне путь короче: заголовок «Направления», волна и сразу карточки */
+    .journey{height:380vh}          /* путь 82% прокрутки (312vh), дальше заголовок, волна и карточки */
     .pr__space{height:150vh}
-    .stick{top:calc(64px * (1 - var(--k,0)));height:calc(100svh - 64px * (1 - var(--k,0)));padding:0 calc(12px * (1 - var(--k,0))) calc(10px * (1 - var(--k,0)))}
-    .plate{border-radius:calc(24px * (1 - var(--k,0)))}
+    .stick{top:0;height:var(--appvh,100svh);padding:0;min-height:0}   /* на телефоне сцена сразу на весь экран */
+    .plate{border-radius:0}
     .top .logo{font-size:22px}
     .top .r .pill{display:none}
     .burger{display:block}
@@ -320,20 +323,21 @@
     .hero__foot{left:20px;right:20px;width:auto;height:52px;font-size:11px}
     .hero__foot span:last-child{display:none}
 
-    .fact{top:auto;bottom:24px;left:20px;right:20px;max-width:none}
-    .fact--r{left:20px;right:20px;text-align:left}
+    .fact{top:16vh;bottom:auto;left:16px;right:16px;max-width:none}
+    .fact--r{left:16px;right:16px;text-align:left}
     .fact--r span{margin-left:0}
-    .fact b{font-size:54px}
-    .fact span{font-size:15px;margin-top:8px;max-width:none}
-    .fact small{margin-top:8px;font-size:10px}
-    .f-plate .fact{width:auto;max-width:none;padding:16px 18px 18px;border-radius:18px}
+    .fact b{font-size:64px}
+    .fact span{font-size:17px;margin-top:10px;max-width:none}
+    .fact small{margin-top:10px;font-size:10px}
+    .f-plate .fact{width:auto;max-width:none;padding:20px 20px 22px;border-radius:20px}
 
     .final{padding-top:186px}
     .final h2{font-size:32px;max-width:11ch}
     .final p{margin-top:14px;font-size:14px}
 
-    .quote__stick{padding:84px 0 84px;min-height:100svh;justify-content:center}
-    .quote__space{height:16vh}
+    .quote__stick{position:static;padding:88px 0;min-height:var(--appvh,100svh);justify-content:center}
+    .quote__space{height:0}
+    .quote__bg{left:0;right:0;top:0;bottom:0;border-radius:0}
     .quote .phrase,.quote .q-foot{margin-left:20px;margin-right:20px}
     .phrase{font-size:26px;line-height:1.16}
     .phrase .b{width:1em;height:1em;margin:0 .1em}
@@ -341,13 +345,17 @@
     .q-foot b{font-size:18px}
     .quote__bg{left:calc(12px * (1 - var(--qk,0)));right:calc(12px * (1 - var(--qk,0)));top:calc(12px * (1 - var(--qk,0)));bottom:calc(12px * (1 - var(--qk,0)));border-radius:calc(24px * (1 - var(--qk,0)))}
 
-    .pr__head{position:absolute;left:20px;right:20px;top:64px;transform:none;max-width:none;text-align:center}
+    .pr{height:auto}
+    .pr__stick{position:static;height:auto;padding:0}
+    .pr__plate{height:var(--appvh,100svh);border-radius:0}
+    .pr__head{position:absolute;left:20px;right:20px;top:56px;transform:none;max-width:none;text-align:center}
     .pr__head h2{font-size:32px}
     .pr__head .sub{font-size:14px;margin-top:14px;max-width:none}
     .pr__lbl{font-size:15px;white-space:normal;max-width:50vw;gap:8px;line-height:1.16}
     .pr__lbl small{font-size:10px}
 
-    .ct{border-radius:28px 28px 0 0;padding:48px 20px 40px;grid-template-columns:1fr;gap:28px}
+    .ct{border-radius:0;box-shadow:none;transform:none!important;padding:56px 20px 40px;grid-template-columns:1fr;gap:28px}
+    .foot{transform:none!important}
     .ct__l{gap:24px}
     .ct__l h2{font-size:32px}
     .ct__list{gap:16px}
@@ -493,6 +501,15 @@
 </script>
 
 <script>
+/* высота окна фиксируется при загрузке и меняется только при повороте: иначе панель браузера на телефоне
+   постоянно меняет innerHeight, сцена пересчитывается и мяч дёргается */
+(function () {
+  var last = innerWidth;
+  function setVH() { document.documentElement.style.setProperty('--appvh', innerHeight + 'px'); }
+  setVH();
+  addEventListener('resize', function () { if (Math.abs(innerWidth - last) > 40) { last = innerWidth; setVH(); } });
+  addEventListener('orientationchange', function () { setTimeout(setVH, 250); });
+})();
 /* узкий экран определяем один раз: карточки физически переезжают в DOM, поэтому менять решение на лету нельзя */
 window.NARROW = innerWidth <= 640;
 if (window.NARROW) document.getElementById('mcards').appendChild(document.getElementById('cards'));
@@ -708,9 +725,10 @@ const PZ = -52;
 /* фон и дымка: под каждыми воротами мир чуть подкрашивается их цветом, в конце — синий целиком */
 const cream = new THREE.Color(CREAM), blue = new THREE.Color(BLUE);
 const tint = (hex, k) => cream.clone().lerp(new THREE.Color(hex), k);
-const BG_KEYS = [                                     // синий заливает мир, пока синяя арка поднимается (-40…-46), через светлый синий, без серого
-  [8, cream], [-6, tint(0xC87B2E, .10)], [-20, tint(0xC39433, .10)], [-32, tint(0x2E6B33, .10)], [-38, cream],
-  [-42, new THREE.Color(0x7FA6C8)], [-47, blue],
+const NARROW0 = innerWidth <= 640;
+const BG_KEYS = [                                     // синий заливает мир, пока синяя арка поднимается, через светлый синий, без серого
+  [8, cream], [-6, tint(0xC87B2E, .10)], [-20, tint(0xC39433, .10)], [-32, tint(0x2E6B33, .10)], [NARROW0 ? -41 : -38, cream],
+  [NARROW0 ? -45 : -42, new THREE.Color(0x7FA6C8)], [NARROW0 ? -49 : -47, blue],
 ];
 const bgColor = new THREE.Color();
 function bgAt(z) {
@@ -773,7 +791,7 @@ plate.addEventListener('pointermove', (e) => {
 plate.addEventListener('pointerleave', () => { target.x = 0; target.y = 0; });
 
 /* ---------- кадр ---------- */
-const UNFOLD_END = 0.22;                      // камера и шар опускаются за эту долю прокрутки; дуги раскрываются по очереди до 0.42
+const UNFOLD_END = window.NARROW ? 0.19 : 0.22;   // камера и шар опускаются за эту долю прокрутки; на телефоне быстрее — кольца не едут через весь экран
 const CAM_BACK = 8;                          // камера за шаром
 const BALL_Z0 = 8, BALL_Z1 = PZ - 2 - CAM_BACK; // камера заканчивает путь под синими воротами
 const quoteEl = document.querySelector('.quote'), quoteStick = document.querySelector('.quote__stick'), ctEl = document.querySelector('.ct');
@@ -788,8 +806,9 @@ function frame() {
   fpsN++; if (t - fpsT >= 1) { fpsEl.textContent = Math.round(fpsN / (t - fpsT)) + ' fps'; fpsN = 0; fpsT = t; }
   if (auto) autoStep();
   const pRaw = progress();
-  const p = Math.min(1, pRaw / 0.672);                                 // путь шара
-  const q = Math.min(1, Math.max(0, (pRaw - 0.672) / 0.328));          // заголовок → карточки
+  const PE = NARROW ? 0.82 : 0.672;                                    // доля прокрутки на путь шара; на телефоне длиннее — цифры успевают показаться
+  const p = Math.min(1, pRaw / PE);                                    // путь шара
+  const q = Math.min(1, Math.max(0, (pRaw - PE) / (1 - PE)));          // заголовок → карточки
   if (forced === null) ui.path.value = pRaw.toFixed(3);
   const speed = reduced ? 0 : parseFloat(ui.spd.value);
 
@@ -843,10 +862,10 @@ function frame() {
   const exit1 = smooth(Math.min(1, Math.max(0, (q - 0.12) / 0.14)));           // пауза: мяч докатился и висит с заголовком, потом заголовок уходит сам
   const shrink = smooth(Math.min(1, Math.max(0, (q - 0.14) / 0.14)));          // мяч уменьшается на месте
   const h2in = smooth(Math.min(1, Math.max(0, (q - 0.16) / 0.26)));             // второй заголовок едет снизу сразу за первым
-  const pushVh = Math.max(0, h2in * 100 - (100 - (NARROW ? 42 : 68) + (NARROW ? 250 : 190) / plate.clientHeight * 100)) * 1.05;   // верх заголовка = 190px + (1−h2in)·100vh; низ сжатого мяча стоит на 68vh (замер) → контакт при h2in≈0.52, дальше мяч едет чуть быстрее заголовка, не отрываясь
+  const pushVh = Math.max(0, h2in * 100 - (100 - (NARROW ? 46 : 68) + (NARROW ? 0.46 * plate.clientHeight : 190) / plate.clientHeight * 100)) * 1.05;   // верх заголовка = 190px + (1−h2in)·100vh; низ сжатого мяча стоит на 68vh (замер) → контакт при h2in≈0.52, дальше мяч едет чуть быстрее заголовка, не отрываясь
   const VH = 0.0746;                                                          // 1vh в мировых единицах на дистанции мяча
   ball.scale.setScalar((CORE_R * (1 - k) + BALL_R * k) * (1 - 0.5 * shrink));
-  ball.position.y += endK * (NARROW ? 3.1 : 0.7) - shrink * 0.5 * BALL_R + pushVh * VH;         // под заголовок (подъём 0.7, чтобы не лезть на подпись) → сжался (низ на месте) → выталкивание
+  ball.position.y += endK * (NARROW ? 2.3 : 0.7) - shrink * 0.5 * BALL_R + pushVh * VH;         // под заголовок (подъём 0.7, чтобы не лезть на подпись) → сжался (низ на месте) → выталкивание
   ball.visible = pushVh < 70;
   ball.rotation.x = -(BALL_Z0 - bz) / BALL_R;
   ball.rotation.y += dt * speed * 0.08 * (1 - k);
@@ -866,7 +885,7 @@ function frame() {
     const d = bz - f.z;
     const gate = smooth(Math.min(1, Math.max(0, (p - 0.17) / 0.06)));                     // не раньше, чем ушёл текст обложки
     const a = NARROW
-      ? gate * smooth(Math.min(1, Math.max(0, (16 - d) / 4))) * (1 - smooth(Math.min(1, Math.max(0, (5 - d) / 2.5))))   // на узком экране цифры в одном месте внизу: показываем раньше и гасим до ворот, иначе последняя попадает на синий финал
+      ? gate * smooth(Math.min(1, Math.max(0, (14 - d) / 3))) * (1 - smooth(Math.min(1, Math.max(0, (6 - d) / 2))))   // на узком экране цифры в одном месте: видна на участке d 14→4 (10 шагов), между воротами 11 — соседние не пересекаются
       : gate * smooth(Math.min(1, Math.max(0, (12 - d) / 5))) * (1 - smooth(Math.min(1, Math.max(0, (-d - 1) / 4))));
     f.el.style.opacity = a.toFixed(3);
     f.el.style.transform = 'translateY(' + ((1 - a) * 28).toFixed(1) + 'px)';
@@ -874,7 +893,7 @@ function frame() {
   const fa = smooth(Math.min(1, Math.max(0, (-51 - bz) / 7)));
   /* второй заголовок и карточки */
   const rise = smooth(Math.min(1, Math.max(0, (q - (NARROW ? 0.34 : 0.3)) / 0.14)));              // карточка идёт сразу за заголовком
-  const waveK = smooth(Math.min(1, Math.max(0, (q - (NARROW ? 0.36 : 0.35)) / (NARROW ? 0.12 : 0.2))));             // белая волна сразу за ней
+  const waveK = smooth(Math.min(1, Math.max(0, (q - (NARROW ? 0.34 : 0.35)) / (NARROW ? 0.26 : 0.2))));             // белая волна сразу за ней
   const spin = smooth(Math.min(1, Math.max(0, (q - 0.52) / 0.34)));             // оборот длиннее
   const sides = smooth(Math.min(1, Math.max(0, (q - 0.5) / 0.2)));              // боковые выезжают с началом оборота и висят, пока он идёт
   final2.style.opacity = q > 0.2 ? '1' : '0';
@@ -896,7 +915,7 @@ function frame() {
   const bg = bgAt(bz);
   plate.style.backgroundColor = '#' + bg.getHexString(); scene.fog.color.copy(bg);
   floorMat.color.copy(bg).lerp(BEIGE, 0.22).multiplyScalar(0.66);   // с учётом освещения пол выходит в тон фона, чуть бежевее
-  const blueK = smooth(Math.min(1, Math.max(0, (-40 - bz) / 7)));           // в синем финале пол растворяется, остаётся заливка
+  const blueK = smooth(Math.min(1, Math.max(0, ((NARROW ? -43 : -40) - bz) / 7)));           // в синем финале пол растворяется, остаётся заливка
   bigword.style.opacity = (0.06 * Math.max(smooth(Math.min(1, Math.max(0, (p - 0.2) / 0.08))) * (1 - blueK), waveNow)).toFixed(3);   // слово появляется с воротами, уходит в синем финале и возвращается с белой волной под карточками
   bigword.style.zIndex = waveNow > 0.01 ? '3' : '0';                             // на белом — над волной (z2), под карточками (z4); на сцене — за арками
   floorMat.opacity = 1 - blueK;
@@ -1035,7 +1054,7 @@ renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFShadowMap;
 renderer.toneMapping = THREE.NoToneMapping; renderer.outputColorSpace = THREE.SRGBColorSpace;
 const scene = new THREE.Scene();
 scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(renderer), 0.04).texture;
-const camera = new THREE.PerspectiveCamera(30, 2, 0.1, 100); camera.position.set(0, 0.8, NARROW ? 26 : 26); camera.lookAt(0, 0, 0);
+const camera = new THREE.PerspectiveCamera(30, 2, 0.1, 100); camera.position.set(0, 0.8, NARROW ? 22 : 26); camera.lookAt(0, 0, 0);
 function pFov(base) { const A = 2.0; if (camera.aspect >= A) return base; const t = Math.tan(THREE.MathUtils.degToRad(base) / 2) * (A / camera.aspect); return Math.min(72, THREE.MathUtils.radToDeg(Math.atan(t) * 2)); }
 scene.add(new THREE.HemisphereLight(0xfff8ee, 0xd9cbb2, 0.45));
 const key = new THREE.DirectionalLight(0xfff4e6, 1.5); key.position.set(-6, 12, 40); key.castShadow = true;   // почти фронтально — тень на стене короткая
@@ -1054,7 +1073,7 @@ const group = new THREE.Group(); scene.add(group);
 let spreadX = 4.6;                                        // насколько слои уезжают влево при разборе
 function place() {                                        // раскладка по ширине плашки: справа должно хватать места подписям
   const w = plate.clientWidth;
-  if (w <= 640) { group.position.set(-3.1, 0, 0); group.scale.setScalar(0.95); spreadX = 1.0; }   // на телефоне слои крупные, левее — справа подписи
+  if (w <= 640) { group.position.set(-2.8, -1.2, 0); group.scale.setScalar(1); spreadX = 0.6; }   // на телефоне слои крупные, ниже заголовка, левее — справа подписи
   else if (w <= 1100) { group.position.set(2.6, 0, 0); group.scale.setScalar(0.76); spreadX = 3.4; }   // планшет: правее и мельче, чтобы не лезть на заголовок
   else { group.position.set(4.6, 0, 0); group.scale.setScalar(1); spreadX = 4.6; }
 }
@@ -1078,10 +1097,10 @@ const _v = new THREE.Vector3();
 function frame() {
   t += Math.min(clock.getDelta(), 0.05);
   const r0 = journey.getBoundingClientRect();
-  const p = progress();
+  const p = NARROW ? 0.5 : progress();   // на телефоне секция обычная: слои стоят разложенными, без сборки
   const Hh = innerHeight;
   /* контакты входят снизу: k — естественный ход (0 → 1 за 100vh прокрутки), e — ускоренный: блок доезжает до верха за половину пути, дальше стоит, пока прокрутка его не догонит */
-  const k = forced !== null ? 0 : Math.min(1, Math.max(0, (scrollY + Hh - (journey.offsetTop + ctTail.offsetTop)) / Hh));
+  const k = (forced !== null || NARROW) ? 0 : Math.min(1, Math.max(0, (scrollY + Hh - (journey.offsetTop + ctTail.offsetTop)) / Hh));
   const e = Math.min(1, k / 0.5);                            // блок доезжает до верха за половину естественного хода
   /* подъём не больше, чем есть места до конца страницы: низ подвала не должен отрываться от низа окна, иначе под ним видна плашка принципов */
   const natBottom = footTail.getBoundingClientRect().bottom + curLift;
@@ -1091,7 +1110,7 @@ function frame() {
   const gone = Math.min(1, e / 0.25);                       // содержимое гаснет быстро: полностью прозрачно, когда контакты закрыли четверть экрана
   prIn.style.opacity = (1 - gone).toFixed(3);
   /* FPS: секция ещё ниже экрана или уже закрыта контактами — 3D не рисуем, но подъём блока и прозрачность выше уже пересчитаны */
-  if (forced === null && (r0.top > innerHeight || ctTail.getBoundingClientRect().top <= 0)) { requestAnimationFrame(frame); return; }
+  if (forced === null && (r0.top > innerHeight || r0.bottom < 0 || (!NARROW && ctTail.getBoundingClientRect().top <= 0))) { requestAnimationFrame(frame); return; }
   /* плашка бежевеет с начала сборки пирамидки (p 0.5→1), бежевой остаётся до наезда белого блока контактов */
   const beige = smooth(Math.min(1, Math.max(0, (p - 0.5) / 0.5)));
   plate.style.backgroundColor = 'color-mix(in srgb, #F0ECE4 ' + (beige * 100).toFixed(1) + '%, #fff)';
@@ -1100,7 +1119,7 @@ function frame() {
   cur.x += (target.x - cur.x) * 0.05; cur.y += (target.y - cur.y) * 0.05;
   group.rotation.y = 0.7 * (1 - K * 0.8) + cur.x * 0.12 + Math.sin(t * 0.3) * 0.05;   // собранный конус на три четверти, разобранный почти фронтально
   group.rotation.x = 0.18 * (1 - K) + cur.y * 0.06;
-  const GAP = plate.clientWidth <= 640 ? 3.1 : 1.7;          // расстояние между разведёнными слоями; на телефоне колонка на весь экран
+  const GAP = plate.clientWidth <= 640 ? 3.0 : 1.7;          // расстояние между разведёнными слоями; на телефоне колонка на весь экран
   /* общая вертикаль подписей: правый край самого большого слоя в разобранном виде */
   _v.set(LEN[0] * 0.5 * 0.66 + (plate.clientWidth <= 640 ? 1.1 : 1.9), 0, 0); parts[0].m.localToWorld(_v); _v.project(camera);   // зазор от синего бруса до цифры
   const labelX = (_v.x * 0.5 + 0.5) * plate.clientWidth;
