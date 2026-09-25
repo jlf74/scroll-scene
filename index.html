@@ -122,7 +122,6 @@
   .wave i{position:absolute;inset:0;background:#fff;display:block}
   /* второй заголовок и карточки направлений — внутри той же сцены */
   .final--2{color:#fff;will-change:transform,opacity;padding-top:clamp(190px,24vh,420px)}   /* на высоких экранах заголовок ниже: меньше пустоты до карточек */
-  @media (max-width:640px){.final--2{padding-top:46vh}}
   .final{will-change:transform,opacity}
   .cards{position:absolute;left:50%;bottom:20px;z-index:4;width:min(1392px, 100vw - 48px);transform:translate(-50%,0);display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;perspective:1600px;pointer-events:none}
   .cards .dir{pointer-events:auto;opacity:0;will-change:transform,opacity;transform-style:preserve-3d;position:relative}
@@ -296,7 +295,7 @@
     .top{height:64px;padding:0 20px}
     .page{padding-top:64px;--gutter:20px}
     .journey{height:380vh}          /* путь 82% прокрутки (312vh), дальше заголовок, волна и карточки */
-    .pr__space{height:150vh}
+    .pr__space{height:0}            /* принципы на телефоне — обычная секция, распорка для sticky не нужна */
     .stick{top:0;height:var(--appvh,100svh);padding:0;min-height:0}   /* на телефоне сцена сразу на весь экран */
     .plate{border-radius:0}
     .top .logo{font-size:22px}
@@ -332,6 +331,7 @@
     .f-plate .fact{width:auto;max-width:none;padding:20px 20px 22px;border-radius:20px}
 
     .final{padding-top:186px}
+    .final--2{padding-top:48vh}     /* «Направления группы» — над стыком с карточками, а не в пустоте */
     .final h2{font-size:32px;max-width:11ch}
     .final p{margin-top:14px;font-size:14px}
 
