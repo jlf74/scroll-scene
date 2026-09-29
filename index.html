@@ -303,7 +303,7 @@
     .top{height:64px;padding:0 20px}
     .page{padding-top:64px;--gutter:20px}
     .journey{height:360vh}          /* путь 87% прокрутки (313vh), хвост 47vh — белая волна поднимается весь хвост */
-    .pr__space{height:180vh}        /* принципы на телефоне: разбор → пауза → сбор → уход (170vh) + 10vh, чтобы сборка успела завершиться до контактов */
+    .pr__space{height:150vh}        /* принципы на телефоне: разбор → пауза → сбор; растворение — по входу контактов снизу, без пустого экрана */
     .stick{top:0;height:100dvh;padding:0;min-height:0}   /* динамическая высота: низ сцены всегда совпадает с низом экрана */
     .plate{border-radius:0}
     .top .logo{font-size:22px}
@@ -340,7 +340,7 @@
     .f-plate .fact{width:max-content;max-width:min(360px, calc(100vw - 48px));padding:24px 26px 26px;border-radius:24px;background:rgba(243,241,234,.94)}   /* по содержимому: не закрывает сцену целиком */
 
     .final{padding-top:186px}
-    .final--2{padding-top:0;top:0;bottom:0;align-items:center;color:var(--ink)}   /* на телефоне заголовок приезжает на белой волне, внизу экрана; карточки — сразу за ним */
+    .final--2{padding-top:0;top:auto;bottom:6vh;align-items:flex-end;color:var(--ink)}   /* на телефоне заголовок приезжает на белой волне, внизу экрана; карточки — сразу за ним */
     .final h2{font-size:32px;max-width:11ch}
     .final p{margin-top:14px;font-size:14px}
 
@@ -918,8 +918,14 @@ const _sz = new THREE.Vector2();
 function resize() {
   const r = plate.getBoundingClientRect(), w = Math.round(r.width), h = Math.round(r.height);
   renderer.setSize(w, h, false);
-  canvas.style.width = w + 'px'; canvas.style.height = h + 'px';           // CSS-размер канваса = буферу, иначе на дробной высоте плашки картинка тянется — мяч овалом
-  camera.aspect = w / h; camera.updateProjectionMatrix();
+  canvas.style.width = '100%'; canvas.style.height = '100%';               // канвас всегда во всю плашку; aspect камеры считается в кадре по фактическому размеру канваса на экране
+  fitAspect();
+}
+const _cr = { w: 0, h: 0 };
+function fitAspect() {                                                       // каждый кадр: во что канвас реально растянут — под то и проекция; иначе на телефоне при движении панели браузера мяч овалом
+  const r = canvas.getBoundingClientRect();
+  if (r.width < 1 || r.height < 1) return;
+  if (Math.abs(r.width - _cr.w) > 0.25 || Math.abs(r.height - _cr.h) > 0.25) { _cr.w = r.width; _cr.h = r.height; camera.aspect = r.width / r.height; camera.updateProjectionMatrix(); }
 }
 resize(); window.addEventListener('resize', resize);
 /* слово STRONG: ширина 94% плашки */
@@ -1104,7 +1110,7 @@ function frame() {
   plate.parentElement.style.setProperty('--k', smooth(Math.min(1, p / 0.08)).toFixed(3));   // рамка уходит во весь экран быстрее колец: за 8% пути вместо 22%
   pageEl.classList.toggle('onscene', k > 0.5);                                   // с появлением арок подложка шапки исчезает
   renderer.getSize(_sz); const pr_ = plate.getBoundingClientRect();
-  if (Math.abs(pr_.width - _sz.x) > 0.75 || Math.abs(pr_.height - _sz.y) > 0.75) resize();   // размер канваса всегда равен плашке, иначе мяч вытягивается в овал   // плашка меняет высоту — мяч не должен становиться овалом
+  if (Math.abs(pr_.width - _sz.x) > 0.75 || Math.abs(pr_.height - _sz.y) > 0.75) resize(); else fitAspect();   // размер канваса всегда равен плашке, иначе мяч вытягивается в овал   // плашка меняет высоту — мяч не должен становиться овалом
 
   sats.forEach(({ a, s }) => { a.getWorldPosition(_p); s.position.copy(_p); s.scale.setScalar(Math.max(0.001, 1 - k * 1.6)); s.visible = k < 0.6; });
 
@@ -1237,7 +1243,7 @@ renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFShadowMap;
 renderer.toneMapping = THREE.NoToneMapping; renderer.outputColorSpace = THREE.SRGBColorSpace;
 const scene = new THREE.Scene();
 scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(renderer), 0.04).texture;
-const camera = new THREE.PerspectiveCamera(30, 2, 0.1, 100); camera.position.set(0, 0.8, NARROW ? 27 : 26); camera.lookAt(0, 0, 0);
+const camera = new THREE.PerspectiveCamera(30, 2, 0.1, 100); camera.position.set(0, 0.8, NARROW ? 29 : 26); camera.lookAt(0, 0, 0);
 function pFov(base) { const A = 2.0; if (camera.aspect >= A) return base; const t = Math.tan(THREE.MathUtils.degToRad(base) / 2) * (A / camera.aspect); return Math.min(72, THREE.MathUtils.radToDeg(Math.atan(t) * 2)); }
 scene.add(new THREE.HemisphereLight(0xfff8ee, 0xd9cbb2, 0.45));
 const key = new THREE.DirectionalLight(0xfff4e6, 1.5); key.position.set(-6, 12, 40); key.castShadow = true;   // почти фронтально — тень на стене короткая
@@ -1256,7 +1262,7 @@ const group = new THREE.Group(); scene.add(group);
 let spreadX = 4.6;                                        // насколько слои уезжают влево при разборе
 function place() {                                        // раскладка по ширине плашки: справа должно хватать места подписям
   const w = plate.clientWidth;
-  if (w <= 640) { group.position.set(0, -1.9, 0); group.scale.setScalar(0.66); spreadX = 0; }   // на телефоне слои по центру и ниже заголовка, подписи под ними
+  if (w <= 640) { group.position.set(0, -1.4, 0); group.scale.setScalar(0.66); spreadX = 0; }   // на телефоне слои по центру и ниже заголовка, подписи под ними
   else if (w <= 1100) { group.position.set(2.6, 0, 0); group.scale.setScalar(0.76); spreadX = 3.4; }   // планшет: правее и мельче, чтобы не лезть на заголовок
   else { group.position.set(4.6, 0, 0); group.scale.setScalar(1); spreadX = 4.6; }
 }
@@ -1269,7 +1275,7 @@ const parts = COLORS.map((hex, i) => {
 });
 function resize() { const w = plate.clientWidth, h = plate.clientHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.fov = pFov(30); camera.updateProjectionMatrix(); place(); }
 resize(); window.addEventListener('resize', resize);
-const ANIM = window.NARROW ? 1.7 : 1.4, HOLD = 0.5;                              // разбор-пауза-сбор — первые 140vh, потом 50vh пауза собранным; дальше контакты едут поверх
+const ANIM = window.NARROW ? 1.5 : 1.4, HOLD = 0.5;                              // разбор-пауза-сбор — первые 140vh, потом 50vh пауза собранным; дальше контакты едут поверх
 function progress() { if (forced !== null) return Math.min(1, Math.max(0, parseFloat(forced))); const r = journey.getBoundingClientRect(); return Math.min(1, Math.max(0, -r.top / (ANIM * innerHeight))); }
 const smooth = (x) => x * x * (3 - 2 * x);
 const target = { x: 0, y: 0 }, cur = { x: 0, y: 0 };
@@ -1291,20 +1297,21 @@ function frame() {
   const tfCt = 'translateY(' + (-curLift).toFixed(1) + 'px)';
   ctTail.style.transform = tfCt; footTail.style.transform = tfCt;
   const gone = Math.min(1, e / 0.7);                          // содержимое гаснет быстро: полностью прозрачно, когда контакты закрыли четверть экрана
-  prIn.style.opacity = (NARROW ? 1 - smooth(Math.min(1, Math.max(0, (p - 0.88) / 0.1))) : 1 - gone).toFixed(3);   // телефон: собрался — и растворяется перед контактами
+  const ctIn = Math.min(1, Math.max(0, (Hh - ctTail.getBoundingClientRect().top) / (Hh * 0.6)));   // контакты входят снизу: 0 → 1, пока закрыли 60% экрана
+  prIn.style.opacity = (NARROW ? 1 - smooth(ctIn) : 1 - gone).toFixed(3);   // телефон: растворяется под входящими контактами, пустого экрана нет   // телефон: собрался — и растворяется перед контактами
   /* FPS: секция ещё ниже экрана или уже закрыта контактами — 3D не рисуем, но подъём блока и прозрачность выше уже пересчитаны */
   if (forced === null && (r0.top > innerHeight || r0.bottom < 0 || ctTail.getBoundingClientRect().top <= 0)) { requestAnimationFrame(frame); return; }   // плашка уже закрыта контактами — не рисуем
   /* плашка бежевеет с начала сборки пирамидки (p 0.5→1), бежевой остаётся до наезда белого блока контактов */
   const beige = smooth(Math.min(1, Math.max(0, (p - 0.5) / 0.5)));
   plate.style.backgroundColor = 'color-mix(in srgb, #F0ECE4 ' + (beige * 100).toFixed(1) + '%, #fff)';
   /* 0…0.4286 — слои расходятся снизу вверх, один за другим (60vh); 0.4286…0.7857 — висят разложенными (50vh); 0.7857…1 — собираются обратно (30vh) */
-  const K = NARROW ? (p < 0.45 ? p / 0.45 : p > 0.7 ? Math.max(0, (0.9 - p) / 0.2) : 1) : (p < 0.4286 ? p / 0.4286 : p > 0.7857 ? (1 - p) / 0.2143 : 1);   // десктоп: 0 → 1 → пауза → 0; телефон: разложился за 62% и держится
+  const K = NARROW ? (p < 0.4 ? p / 0.4 : p > 0.68 ? Math.max(0, (0.95 - p) / 0.27) : 1) : (p < 0.4286 ? p / 0.4286 : p > 0.7857 ? (1 - p) / 0.2143 : 1);   // десктоп: 0 → 1 → пауза → 0; телефон: разложился за 62% и держится
   cur.x += (target.x - cur.x) * 0.05; cur.y += (target.y - cur.y) * 0.05;
   group.rotation.y = 0.7 * (1 - K * 0.8) + cur.x * 0.12 + Math.sin(t * 0.3) * 0.05;   // собранный конус на три четверти, разобранный почти фронтально
   group.rotation.x = 0.18 * (1 - K) + cur.y * 0.06;
   if (plate.clientWidth <= 640) group.scale.setScalar(0.66 * (1.45 - 0.45 * K));   // телефон: собранный конус крупный, разложенный — компактный
   const under = plate.clientWidth <= 640;                   // подписи под слоями (телефон) или справа (десктоп)
-  const GAP = under ? 4.5 : 1.7;          // расстояние между разведёнными слоями; на телефоне колонка на весь экран
+  const GAP = under ? 5.4 : 1.7;          // расстояние между разведёнными слоями; на телефоне колонка на весь экран
   /* общая вертикаль подписей: правый край самого большого слоя в разобранном виде */
   _v.set(LEN[0] * 0.5 * 0.66 + (plate.clientWidth <= 640 ? 1.1 : 1.9), 0, 0); parts[0].m.localToWorld(_v); _v.project(camera);   // зазор от синего бруса до цифры
   const labelX = (_v.x * 0.5 + 0.5) * plate.clientWidth;
