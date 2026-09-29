@@ -667,7 +667,7 @@ if (window.NARROW) {
       ['Цитата', q.offsetTop], ['Принципы', pr.offsetTop + 0.75 * H], ['Контакты', pr.offsetTop + ct.offsetTop], ['Конец', maxY]];
     else list = [
       ['Обложка', 0], ['25 лет', at(0.208)], ['№1', at(0.312)], ['Топ 10', at(0.417)], ['Топ 3', at(0.500)],
-      ['Лучший клиентский сервис', at(0.698)], ['Направления группы', at(0.984)],
+      ['Лучший клиентский сервис', at(0.698)], ['Направления группы', at(1.0)],   // самый конец сцены: карточки уже развернулись и стоят
       ['Цитата', q.offsetTop], ['Принципы', pr.offsetTop + 0.84 * H], ['Контакты', pr.offsetTop + ct.offsetTop], ['Конец', maxY]];
     var out = [];
     list.forEach(function (p) { var y = Math.max(0, Math.min(maxY, Math.round(p[1]))); if (!out.length) out.push([p[0], y]); else if (y > out[out.length - 1][1] + 300) out.push([p[0], y]); else out[out.length - 1][1] = y; });   // точки ближе 300px склеиваем: «Контакты» и «Конец» — один шаг
