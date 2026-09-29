@@ -118,7 +118,7 @@
 
   /* белая волна: приходит снизу с чёткой кромкой, как на референсе */
   .wave{position:absolute;left:0;right:0;top:0;height:100%;z-index:2;pointer-events:none;transform:translateY(100%) translateY(16vh);will-change:transform}
-  .wave svg{position:absolute;left:0;right:0;bottom:100%;width:100%;height:16vh;display:block}
+  .wave svg{position:absolute;left:0;right:0;bottom:calc(100% - 1px);width:100%;height:16vh;display:block}   /* перекрытие 1px: без него на телефоне видна линия стыка */
   .wave i{position:absolute;inset:0;background:#fff;display:block}
   /* второй заголовок и карточки направлений — внутри той же сцены */
   .final--2{color:#fff;will-change:transform,opacity;padding-top:clamp(150px,17vh,320px)}
@@ -303,7 +303,7 @@
     .top{height:64px;padding:0 20px}
     .page{padding-top:64px;--gutter:20px}
     .journey{height:360vh}          /* путь 87% прокрутки (313vh), хвост 47vh — белая волна поднимается весь хвост */
-    .pr__space{height:170vh}        /* принципы на телефоне: разбор → пауза → сбор → уход, потом контакты */
+    .pr__space{height:180vh}        /* принципы на телефоне: разбор → пауза → сбор → уход (170vh) + 10vh, чтобы сборка успела завершиться до контактов */
     .stick{top:0;height:100dvh;padding:0;min-height:0}   /* динамическая высота: низ сцены всегда совпадает с низом экрана */
     .plate{border-radius:0}
     .top .logo{font-size:22px}
@@ -340,7 +340,7 @@
     .f-plate .fact{width:max-content;max-width:min(360px, calc(100vw - 48px));padding:24px 26px 26px;border-radius:24px;background:rgba(243,241,234,.94)}   /* по содержимому: не закрывает сцену целиком */
 
     .final{padding-top:186px}
-    .final--2{padding-top:0;top:auto;bottom:11vh;align-items:flex-end;color:var(--ink)}   /* на телефоне заголовок приезжает на белой волне, внизу экрана; карточки — сразу за ним */
+    .final--2{padding-top:0;top:0;bottom:0;align-items:center;color:var(--ink)}   /* на телефоне заголовок приезжает на белой волне, внизу экрана; карточки — сразу за ним */
     .final h2{font-size:32px;max-width:11ch}
     .final p{margin-top:14px;font-size:14px}
 
@@ -914,9 +914,11 @@ function fovFor(base) {
   const t = Math.tan(THREE.MathUtils.degToRad(base) / 2) * (A / camera.aspect);
   return Math.min(80, THREE.MathUtils.radToDeg(Math.atan(t) * 2));
 }
+const _sz = new THREE.Vector2();
 function resize() {
-  const w = plate.clientWidth, h = plate.clientHeight;
+  const r = plate.getBoundingClientRect(), w = Math.round(r.width), h = Math.round(r.height);
   renderer.setSize(w, h, false);
+  canvas.style.width = w + 'px'; canvas.style.height = h + 'px';           // CSS-размер канваса = буферу, иначе на дробной высоте плашки картинка тянется — мяч овалом
   camera.aspect = w / h; camera.updateProjectionMatrix();
 }
 resize(); window.addEventListener('resize', resize);
@@ -1077,7 +1079,7 @@ function frame() {
     final2.style.transform = 'translateY(' + ((1 - h2in) * 100).toFixed(1) + 'vh)';
   }
   waveNow = waveK;
-  const wv = NARROW ? waveK * 0.55 : waveK;                                        // на телефоне волна поднимается до 72% — сверху остаётся синий, следующая секция продолжает белое
+  const wv = waveK;                                        // на телефоне волна поднимается до 72% — сверху остаётся синий, следующая секция продолжает белое
   waveEl.style.transform = 'translateY(' + ((1 - wv) * 100).toFixed(1) + '%) translateY(' + ((1 - wv) * 16).toFixed(1) + 'vh)';
   if (HAS_F2 && !NARROW) h2dirs.style.color = waveK > 0.74 ? '#14141A' : '#fff';   // темнеет, когда кромка волны проходит через заголовок
   if (!NARROW) {                                                              // на узком экране карточки живут отдельной секцией, а не в сцене
@@ -1101,8 +1103,8 @@ function frame() {
   pageEl.classList.toggle('onblue', blueK > 0.6 && waveNow < 0.85);   // шапка без подложки на синем
   plate.parentElement.style.setProperty('--k', smooth(Math.min(1, p / 0.08)).toFixed(3));   // рамка уходит во весь экран быстрее колец: за 8% пути вместо 22%
   pageEl.classList.toggle('onscene', k > 0.5);                                   // с появлением арок подложка шапки исчезает
-  const rw = renderer.domElement.width / renderer.getPixelRatio(), rh = renderer.domElement.height / renderer.getPixelRatio();
-  if (Math.abs(plate.clientWidth - rw) > 0.5 || Math.abs(plate.clientHeight - rh) > 0.5) resize();   // размер канваса всегда равен плашке, иначе мяч вытягивается в овал   // плашка меняет высоту — мяч не должен становиться овалом
+  renderer.getSize(_sz); const pr_ = plate.getBoundingClientRect();
+  if (Math.abs(pr_.width - _sz.x) > 0.75 || Math.abs(pr_.height - _sz.y) > 0.75) resize();   // размер канваса всегда равен плашке, иначе мяч вытягивается в овал   // плашка меняет высоту — мяч не должен становиться овалом
 
   sats.forEach(({ a, s }) => { a.getWorldPosition(_p); s.position.copy(_p); s.scale.setScalar(Math.max(0.001, 1 - k * 1.6)); s.visible = k < 0.6; });
 
@@ -1291,7 +1293,7 @@ function frame() {
   const gone = Math.min(1, e / 0.7);                          // содержимое гаснет быстро: полностью прозрачно, когда контакты закрыли четверть экрана
   prIn.style.opacity = (NARROW ? 1 - smooth(Math.min(1, Math.max(0, (p - 0.88) / 0.1))) : 1 - gone).toFixed(3);   // телефон: собрался — и растворяется перед контактами
   /* FPS: секция ещё ниже экрана или уже закрыта контактами — 3D не рисуем, но подъём блока и прозрачность выше уже пересчитаны */
-  if (forced === null && (r0.top > innerHeight || r0.bottom < 0 || (!NARROW && ctTail.getBoundingClientRect().top <= 0))) { requestAnimationFrame(frame); return; }
+  if (forced === null && (r0.top > innerHeight || r0.bottom < 0 || ctTail.getBoundingClientRect().top <= 0)) { requestAnimationFrame(frame); return; }   // плашка уже закрыта контактами — не рисуем
   /* плашка бежевеет с начала сборки пирамидки (p 0.5→1), бежевой остаётся до наезда белого блока контактов */
   const beige = smooth(Math.min(1, Math.max(0, (p - 0.5) / 0.5)));
   plate.style.backgroundColor = 'color-mix(in srgb, #F0ECE4 ' + (beige * 100).toFixed(1) + '%, #fff)';
