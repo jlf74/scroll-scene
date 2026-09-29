@@ -121,7 +121,8 @@
   .wave svg{position:absolute;left:0;right:0;bottom:100%;width:100%;height:16vh;display:block}
   .wave i{position:absolute;inset:0;background:#fff;display:block}
   /* второй заголовок и карточки направлений — внутри той же сцены */
-  .final--2{color:#fff;will-change:transform,opacity;padding-top:clamp(190px,24vh,420px)}   /* на высоких экранах заголовок ниже: меньше пустоты до карточек */
+  .final--2{color:#fff;will-change:transform,opacity;padding-top:clamp(150px,17vh,320px)}
+  @media (min-width:641px){.final--2 h2{max-width:none;white-space:nowrap}.final--2 h2 br{display:none}}   /* в одну строку, выше карточек; на телефоне перенос остаётся */   /* на высоких экранах заголовок ниже: меньше пустоты до карточек */
   .final{will-change:transform,opacity}
   .cards{position:absolute;left:50%;bottom:20px;z-index:4;width:min(1392px, 100vw - 48px);transform:translate(-50%,0);display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;perspective:1600px;pointer-events:none}
   .cards .dir{pointer-events:auto;opacity:0;will-change:transform,opacity;transform-style:preserve-3d;position:relative}
@@ -656,10 +657,10 @@ if (window.NARROW) {
       ['Цитата', q.offsetTop], ['Принципы', pr.offsetTop + 0.75 * H], ['Контакты', pr.offsetTop + ct.offsetTop], ['Конец', maxY]];
     else list = [
       ['Обложка', 0], ['25 лет', at(0.208)], ['№1', at(0.312)], ['Топ 10', at(0.417)], ['Топ 3', at(0.500)],
-      ['Лучший клиентский сервис', at(0.698)], ['Направления группы', at(1.0)],   // самый конец сцены: карточки уже развернулись и стоят
-      ['Цитата', q.offsetTop], ['Принципы', pr.offsetTop + 0.84 * H], ['Контакты', pr.offsetTop + ct.offsetTop], ['Конец', maxY]];
+      ['Лучший клиентский сервис', at(0.698)], ['Направления группы', at(1.0), 3400],   // самый конец сцены: карточки уже развернулись и стоят
+      ['Цитата', q.offsetTop], ['Принципы', pr.offsetTop + 0.84 * H], ['Контакты', pr.offsetTop + ct.offsetTop, 3200], ['Конец', maxY]];
     var out = [];
-    list.forEach(function (p) { var y = Math.max(0, Math.min(maxY, Math.round(p[1]))); if (!out.length) out.push([p[0], y]); else if (y > out[out.length - 1][1] + 300) out.push([p[0], y]); else out[out.length - 1][1] = y; });   // точки ближе 300px склеиваем: «Контакты» и «Конец» — один шаг
+    list.forEach(function (p) { var y = Math.max(0, Math.min(maxY, Math.round(p[1]))); if (!out.length) out.push([p[0], y, p[2]]); else if (y > out[out.length - 1][1] + 300) out.push([p[0], y, p[2]]); else out[out.length - 1][1] = y; });   // точки ближе 300px склеиваем: «Контакты» и «Конец» — один шаг
     return out;
   }
   var pts = points(), busy = false, last = 0, queued = 0, t0 = 0, dur = 0, cur = 0, lastWheel = 0;
@@ -669,7 +670,7 @@ if (window.NARROW) {
     var from = scrollY, to = pts[i][1];
     if (Math.abs(to - from) < 2) { busy = false; return; }
     busy = true; cur = i;
-    var dist = Math.abs(to - from); dur = Math.min(2200, Math.max(1100, dist * 1.6)); t0 = performance.now();
+    var dist = Math.abs(to - from); dur = pts[i][2] || Math.min(2200, Math.max(1100, dist * 1.6));   // у точки может быть своя длительность t0 = performance.now();
     var ease = function (t) { return -(Math.cos(Math.PI * t) - 1) / 2; };                 // синусоида: без рывка на старте и в конце
     (function step() {
       var k = Math.min(1, (performance.now() - t0) / dur);
@@ -1026,10 +1027,17 @@ function frame() {
   const exit1 = NARROW ? 0 : smooth(Math.min(1, Math.max(0, (q - 0.12) / 0.14)));   // пауза: мяч докатился и висит с заголовком, потом заголовок уходит сам; на телефоне остаётся на синем
   const shrink = smooth(Math.min(1, Math.max(0, (q - 0.14) / 0.14)));          // мяч уменьшается на месте
   const h2in = smooth(Math.min(1, Math.max(0, (q - 0.16) / 0.26)));             // второй заголовок едет снизу сразу за первым
-  const pushVh = NARROW ? 0 : Math.max(0, h2in * 100 - (100 - 68 + 190 / plate.clientHeight * 100)) * 1.05;   // на телефоне мяч не выталкивается — его накрывает волна   // верх заголовка = 190px + (1−h2in)·100vh; низ сжатого мяча стоит на 68vh (замер) → контакт при h2in≈0.52, дальше мяч едет чуть быстрее заголовка, не отрываясь
   const VH = 0.0746;                                                          // 1vh в мировых единицах на дистанции мяча
-  ball.scale.setScalar((CORE_R * (1 - k) + BALL_R * k) * (1 - 0.5 * shrink));
-  ball.position.y += endK * (NARROW ? 1.1 : 0.7) - shrink * 0.5 * BALL_R + pushVh * VH;         // под заголовок (подъём 0.7, чтобы не лезть на подпись) → сжался (низ на месте) → выталкивание
+  ball.scale.setScalar((CORE_R * (1 - k) + BALL_R * k) * (1 - 0.5 * shrink) * (1 - (NARROW ? 0 : 0.14) * endK));   // на синем чуть меньше
+  ball.position.y += endK * (NARROW ? 1.1 : 0.42) - shrink * 0.5 * BALL_R;               // под заголовок (подъём 0.42 — чуть ниже подписи)
+  /* контакт со вторым заголовком — по экрану: низ мяча проецируем камерой, верх заголовка берём из DOM; константы не нужны */
+  let pushVh = 0;
+  if (!NARROW && HAS_F2 && h2in > 0) {
+    _p.copy(ball.position); _p.y -= BALL_R * ball.scale.x; _p.project(camera);
+    const ballBottom = (1 - _p.y) / 2 * plate.clientHeight, hTop = h2dirs.getBoundingClientRect().top - plate.getBoundingClientRect().top;
+    pushVh = Math.max(0, (ballBottom - hTop) / plate.clientHeight * 100) * 1.05;
+  }
+  ball.position.y += pushVh * VH;         // под заголовок (подъём 0.7, чтобы не лезть на подпись) → сжался (низ на месте) → выталкивание
   ball.visible = pushVh < 70;
   ball.rotation.x = -(BALL_Z0 - bz) / BALL_R;
   ball.rotation.y += dt * speed * 0.08 * (1 - k);
@@ -1274,13 +1282,13 @@ function frame() {
   const Hh = innerHeight;
   /* контакты входят снизу: k — естественный ход (0 → 1 за 100vh прокрутки), e — ускоренный: блок доезжает до верха за половину пути, дальше стоит, пока прокрутка его не догонит */
   const k = (forced !== null || NARROW) ? 0 : Math.min(1, Math.max(0, (scrollY + Hh - (journey.offsetTop + ctTail.offsetTop)) / Hh));
-  const e = Math.min(1, k / 0.5);                            // блок доезжает до верха за половину естественного хода
+  const e = k;                                               // без ускорения: при переезде «по точкам» ускорение давало рывок
   /* подъём не больше, чем есть места до конца страницы: низ подвала не должен отрываться от низа окна, иначе под ним видна плашка принципов */
   const natBottom = footTail.getBoundingClientRect().bottom + curLift;
   curLift = Math.max(0, Math.min((e - k) * Hh, natBottom - Hh));
   const tfCt = 'translateY(' + (-curLift).toFixed(1) + 'px)';
   ctTail.style.transform = tfCt; footTail.style.transform = tfCt;
-  const gone = Math.min(1, e / 0.25);                       // содержимое гаснет быстро: полностью прозрачно, когда контакты закрыли четверть экрана
+  const gone = Math.min(1, e / 0.7);                          // содержимое гаснет быстро: полностью прозрачно, когда контакты закрыли четверть экрана
   prIn.style.opacity = (1 - gone).toFixed(3);
   /* FPS: секция ещё ниже экрана или уже закрыта контактами — 3D не рисуем, но подъём блока и прозрачность выше уже пересчитаны */
   if (forced === null && (r0.top > innerHeight || r0.bottom < 0 || (!NARROW && ctTail.getBoundingClientRect().top <= 0))) { requestAnimationFrame(frame); return; }
