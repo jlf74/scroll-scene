@@ -681,7 +681,9 @@ if (window.NARROW) {
   }
   /* колесо: любое движение — шаг. В покое едем сразу; в пути (после первой трети) ставим следующий шаг в очередь,
      чтобы намеренное второе движение не пропадало, а хвост инерции тачпада сразу после старта — не считался */
+  var TOUCH = matchMedia('(pointer: coarse)').matches;                  // тач-устройство: колесо не перехватываем (мышь к планшету — редкость, а тачпад-события с пером мешают)
   addEventListener('wheel', function (e) {
+    if (TOUCH) return;
     if (e.target.closest && e.target.closest('.ct__map, .mail')) return;
     e.preventDefault();
     var dy = e.deltaY * (e.deltaMode === 1 ? 40 : e.deltaMode === 2 ? innerHeight : 1);   // Firefox шлёт строки, а не пиксели
@@ -693,14 +695,12 @@ if (window.NARROW) {
     go(nearest() + d);
   }, { passive: false });
   addEventListener('keydown', function (e) {
+    if (TOUCH) return;
     var d = { ArrowDown: 1, PageDown: 1, ' ': 1, ArrowUp: -1, PageUp: -1, Home: -99, End: 99 }[e.key];
     if (d === undefined || (e.target.matches && e.target.matches('input,textarea'))) return;
     e.preventDefault(); if (busy) { queued = d > 0 ? 1 : -1; return; } go(nearest() + d);
   });
-  var ty = null;
-  addEventListener('touchstart', function (e) { ty = e.target.closest && e.target.closest('.ct__map, .mail, .top nav') ? null : e.touches[0].clientY; }, { passive: true });
-  addEventListener('touchmove', function (e) { if (ty !== null) e.preventDefault(); }, { passive: false });
-  addEventListener('touchend', function (e) { if (ty === null) return; var dy = ty - e.changedTouches[0].clientY; ty = null; if (Math.abs(dy) < 30) return; if (busy) { queued = dy > 0 ? 1 : -1; return; } go(nearest() + (dy > 0 ? 1 : -1)); });
+  /* тач-экраны (телефон, планшет): родная прокрутка с инерцией — перехват свайпа держал страницу, пока палец на экране, и дёргал её после */
   addEventListener('resize', function () { pts = points(); });
 })();
 </script>
