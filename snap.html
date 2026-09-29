@@ -638,17 +638,6 @@ if (window.NARROW) {
 
 
 <style>
-  /* навигация по точкам: справа столбик точек, активная — красная; подпись по наведению */
-  .snap{position:fixed;right:18px;top:50%;transform:translateY(-50%);z-index:60;display:flex;flex-direction:column;gap:10px;align-items:flex-end}
-  .snap button{position:relative;width:26px;height:26px;border:0;background:none;padding:0;cursor:pointer}
-  .snap button::before{content:"";position:absolute;left:50%;top:50%;width:8px;height:8px;margin:-4px 0 0 -4px;border-radius:50%;background:var(--ink);opacity:.28;transition:transform .25s,opacity .25s,background .25s}
-  .snap button:hover::before{opacity:.7}
-  .snap button.on::before{background:var(--c1);opacity:1;transform:scale(1.5)}
-  .snap button::after{content:attr(data-n);position:absolute;right:30px;top:50%;transform:translateY(-50%);white-space:nowrap;font-size:12px;font-weight:600;color:var(--ink);background:rgba(255,255,255,.92);padding:5px 10px;border-radius:999px;opacity:0;pointer-events:none;transition:opacity .2s;box-shadow:0 4px 14px rgba(20,20,26,.12)}
-  .snap button:hover::after{opacity:1}
-  .onblue .snap button::before{background:#fff}
-  .onblue .snap button.on::before{background:var(--c1)}
-  @media (max-width:640px){.snap{right:8px;gap:8px}.snap button{width:22px;height:22px}}
   html{scroll-behavior:auto!important}
 </style>
 <script>
@@ -673,49 +662,45 @@ if (window.NARROW) {
     list.forEach(function (p) { var y = Math.max(0, Math.min(maxY, Math.round(p[1]))); if (!out.length) out.push([p[0], y]); else if (y > out[out.length - 1][1] + 300) out.push([p[0], y]); else out[out.length - 1][1] = y; });   // точки ближе 300px склеиваем: «Контакты» и «Конец» — один шаг
     return out;
   }
-  var pts = points(), busy = false, last = 0, nav;
+  var pts = points(), busy = false, last = 0, queued = 0, t0 = 0, dur = 0, cur = 0, lastWheel = 0;
   function nearest() { var y = scrollY, k = 0; pts.forEach(function (p, i) { if (Math.abs(p[1] - y) < Math.abs(pts[k][1] - y)) k = i; }); return k; }
-  function mark(i) { if (!nav) return; [].forEach.call(nav.children, function (b, k) { b.classList.toggle('on', k === i); }); }
   function go(i) {
     i = Math.max(0, Math.min(pts.length - 1, i));
-    var from = scrollY, to = pts[i][1]; mark(i);
-    if (Math.abs(to - from) < 2) return;
-    busy = true;
-    var dist = Math.abs(to - from), dur = Math.min(1500, Math.max(650, dist * 0.9)), t0 = performance.now();
-    var ease = function (t) { return t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; };
+    var from = scrollY, to = pts[i][1];
+    if (Math.abs(to - from) < 2) { busy = false; return; }
+    busy = true; cur = i;
+    var dist = Math.abs(to - from); dur = Math.min(2200, Math.max(1100, dist * 1.6)); t0 = performance.now();
+    var ease = function (t) { return -(Math.cos(Math.PI * t) - 1) / 2; };                 // синусоида: без рывка на старте и в конце
     (function step() {
       var k = Math.min(1, (performance.now() - t0) / dur);
       window.scrollTo(0, from + (to - from) * ease(k));
-      if (k < 1) requestAnimationFrame(step); else { busy = false; last = performance.now(); }
+      if (k < 1) requestAnimationFrame(step);
+      else { busy = false; last = performance.now(); if (queued) { var d = queued; queued = 0; go(cur + d); } }   // движение во время переезда — следующий шаг сразу
     })();
   }
-  /* колесо: один шаг, потом пауза 700 мс — чтобы инерция тачпада не считалась вторым шагом */
+  /* колесо: любое движение — шаг. В покое едем сразу; в пути (после первой трети) ставим следующий шаг в очередь,
+     чтобы намеренное второе движение не пропадало, а хвост инерции тачпада сразу после старта — не считался */
   addEventListener('wheel', function (e) {
     if (e.target.closest && e.target.closest('.ct__map, .mail')) return;
     e.preventDefault();
-    if (busy || performance.now() - last < 700 || Math.abs(e.deltaY) < 4) return;
-    go(nearest() + (e.deltaY > 0 ? 1 : -1));
+    var dy = e.deltaY * (e.deltaMode === 1 ? 40 : e.deltaMode === 2 ? innerHeight : 1);   // Firefox шлёт строки, а не пиксели
+    if (Math.abs(dy) < 4) return;
+    var now = performance.now(), gap = now - lastWheel; lastWheel = now;          // события ближе 200 мс друг к другу — один жест (щелчок колеса, поток тачпада с инерцией)
+    var d = dy > 0 ? 1 : -1;
+    if (busy) { if (gap > 200 && (now - t0) / dur > 0.35 && Math.abs(dy) >= 60) queued = d; return; }   // новый сильный жест в пути — следующий шаг сразу после приезда; слабый хвост инерции не считается
+    if (now - last < 250 && gap < 200) return;                                     // хвост того же жеста после приезда — не шаг
+    go(nearest() + d);
   }, { passive: false });
   addEventListener('keydown', function (e) {
     var d = { ArrowDown: 1, PageDown: 1, ' ': 1, ArrowUp: -1, PageUp: -1, Home: -99, End: 99 }[e.key];
     if (d === undefined || (e.target.matches && e.target.matches('input,textarea'))) return;
-    e.preventDefault(); if (busy) return; go(nearest() + d);
+    e.preventDefault(); if (busy) { queued = d > 0 ? 1 : -1; return; } go(nearest() + d);
   });
   var ty = null;
   addEventListener('touchstart', function (e) { ty = e.target.closest && e.target.closest('.ct__map, .mail, .top nav') ? null : e.touches[0].clientY; }, { passive: true });
   addEventListener('touchmove', function (e) { if (ty !== null) e.preventDefault(); }, { passive: false });
-  addEventListener('touchend', function (e) { if (ty === null) return; var dy = ty - e.changedTouches[0].clientY; ty = null; if (Math.abs(dy) < 30 || busy) return; go(nearest() + (dy > 0 ? 1 : -1)); });
-  /* точки справа */
-  function buildNav() {
-    if (nav) nav.remove();
-    nav = document.createElement('div'); nav.className = 'snap';
-    pts.forEach(function (p, i) { var b = document.createElement('button'); b.type = 'button'; b.setAttribute('data-n', p[0]); b.setAttribute('aria-label', p[0]); b.onclick = function () { if (!busy) go(i); }; nav.appendChild(b); });
-    document.body.appendChild(nav); mark(nearest());
-  }
-  addEventListener('load', function () { setTimeout(function () { pts = points(); buildNav(); }, 300); });
-  addEventListener('resize', function () { pts = points(); buildNav(); });
-  addEventListener('scroll', function () { if (!busy) mark(nearest()); }, { passive: true });
-  /* меню и окошко письма прокручивают сами — после них пересчитываем активную точку */
+  addEventListener('touchend', function (e) { if (ty === null) return; var dy = ty - e.changedTouches[0].clientY; ty = null; if (Math.abs(dy) < 30) return; if (busy) { queued = dy > 0 ? 1 : -1; return; } go(nearest() + (dy > 0 ? 1 : -1)); });
+  addEventListener('resize', function () { pts = points(); });
 })();
 </script>
 
