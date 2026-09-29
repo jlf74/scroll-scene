@@ -636,6 +636,74 @@ if (window.NARROW) {
 })();
 </script>
 
+
+<style>
+  html{scroll-behavior:auto!important}
+</style>
+<script>
+/* «Ведём по точкам» (решение Юли 29.09: в основном файле): одно движение колеса / клавиша / свайп = один шаг к следующей ключевой точке.
+   Между точками страница едет сама (~0.7–1.5 с), сцена при этом проигрывается как ролик. */
+(function () {
+  var NARROW = innerWidth <= 640;
+  function points() {
+    var H = innerHeight, j = document.getElementById('journey'), q = document.querySelector('.quote'), pr = document.getElementById('pjourney'), ct = document.querySelector('.ct'), mc = document.getElementById('mcards');
+    var top = NARROW ? 64 : 84, jl = j.offsetHeight - (H - top), at = function (f) { return j.offsetTop - top + f * jl; };
+    var maxY = document.documentElement.scrollHeight - H, list;
+    if (NARROW) list = [
+      ['Обложка', 0], ['25 лет', at(0.329)], ['№1', at(0.475)], ['Топ 10', at(0.622)], ['Топ 3', at(0.737)],
+      ['Лучший клиентский сервис', at(0.92)], ['Направления группы', at(0.976)],
+      ['STRONG', mc.offsetTop + 40], ['ART UNION', mc.offsetTop + 470], ['NEWIDEAS', mc.offsetTop + 900],
+      ['Цитата', q.offsetTop], ['Принципы', pr.offsetTop + 0.75 * H], ['Контакты', pr.offsetTop + ct.offsetTop], ['Конец', maxY]];
+    else list = [
+      ['Обложка', 0], ['25 лет', at(0.208)], ['№1', at(0.312)], ['Топ 10', at(0.417)], ['Топ 3', at(0.500)],
+      ['Лучший клиентский сервис', at(0.698)], ['Направления группы', at(1.0)],   // самый конец сцены: карточки уже развернулись и стоят
+      ['Цитата', q.offsetTop], ['Принципы', pr.offsetTop + 0.84 * H], ['Контакты', pr.offsetTop + ct.offsetTop], ['Конец', maxY]];
+    var out = [];
+    list.forEach(function (p) { var y = Math.max(0, Math.min(maxY, Math.round(p[1]))); if (!out.length) out.push([p[0], y]); else if (y > out[out.length - 1][1] + 300) out.push([p[0], y]); else out[out.length - 1][1] = y; });   // точки ближе 300px склеиваем: «Контакты» и «Конец» — один шаг
+    return out;
+  }
+  var pts = points(), busy = false, last = 0, queued = 0, t0 = 0, dur = 0, cur = 0, lastWheel = 0;
+  function nearest() { var y = scrollY, k = 0; pts.forEach(function (p, i) { if (Math.abs(p[1] - y) < Math.abs(pts[k][1] - y)) k = i; }); return k; }
+  function go(i) {
+    i = Math.max(0, Math.min(pts.length - 1, i));
+    var from = scrollY, to = pts[i][1];
+    if (Math.abs(to - from) < 2) { busy = false; return; }
+    busy = true; cur = i;
+    var dist = Math.abs(to - from); dur = Math.min(2200, Math.max(1100, dist * 1.6)); t0 = performance.now();
+    var ease = function (t) { return -(Math.cos(Math.PI * t) - 1) / 2; };                 // синусоида: без рывка на старте и в конце
+    (function step() {
+      var k = Math.min(1, (performance.now() - t0) / dur);
+      window.scrollTo(0, from + (to - from) * ease(k));
+      if (k < 1) requestAnimationFrame(step);
+      else { busy = false; last = performance.now(); if (queued) { var d = queued; queued = 0; go(cur + d); } }   // движение во время переезда — следующий шаг сразу
+    })();
+  }
+  /* колесо: любое движение — шаг. В покое едем сразу; в пути (после первой трети) ставим следующий шаг в очередь,
+     чтобы намеренное второе движение не пропадало, а хвост инерции тачпада сразу после старта — не считался */
+  addEventListener('wheel', function (e) {
+    if (e.target.closest && e.target.closest('.ct__map, .mail')) return;
+    e.preventDefault();
+    var dy = e.deltaY * (e.deltaMode === 1 ? 40 : e.deltaMode === 2 ? innerHeight : 1);   // Firefox шлёт строки, а не пиксели
+    if (Math.abs(dy) < 4) return;
+    var now = performance.now(), gap = now - lastWheel; lastWheel = now;          // события ближе 200 мс друг к другу — один жест (щелчок колеса, поток тачпада с инерцией)
+    var d = dy > 0 ? 1 : -1;
+    if (busy) { if (gap > 200 && (now - t0) / dur > 0.35 && Math.abs(dy) >= 60) queued = d; return; }   // новый сильный жест в пути — следующий шаг сразу после приезда; слабый хвост инерции не считается
+    if (now - last < 250 && gap < 200) return;                                     // хвост того же жеста после приезда — не шаг
+    go(nearest() + d);
+  }, { passive: false });
+  addEventListener('keydown', function (e) {
+    var d = { ArrowDown: 1, PageDown: 1, ' ': 1, ArrowUp: -1, PageUp: -1, Home: -99, End: 99 }[e.key];
+    if (d === undefined || (e.target.matches && e.target.matches('input,textarea'))) return;
+    e.preventDefault(); if (busy) { queued = d > 0 ? 1 : -1; return; } go(nearest() + d);
+  });
+  var ty = null;
+  addEventListener('touchstart', function (e) { ty = e.target.closest && e.target.closest('.ct__map, .mail, .top nav') ? null : e.touches[0].clientY; }, { passive: true });
+  addEventListener('touchmove', function (e) { if (ty !== null) e.preventDefault(); }, { passive: false });
+  addEventListener('touchend', function (e) { if (ty === null) return; var dy = ty - e.changedTouches[0].clientY; ty = null; if (Math.abs(dy) < 30) return; if (busy) { queued = dy > 0 ? 1 : -1; return; } go(nearest() + (dy > 0 ? 1 : -1)); });
+  addEventListener('resize', function () { pts = points(); });
+})();
+</script>
+
 <script type="importmap">
 { "imports": {
   "three": "./vendor/three.module.js",
