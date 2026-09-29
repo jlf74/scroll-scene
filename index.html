@@ -227,8 +227,9 @@
   .m-only{display:none}
   .mcards:empty{display:none}
   /* карточки направлений: на узком экране JS переносит их сюда из сцены — в 3D-полёте на телефоне они не читаются */
-  .mcards{padding:12px 20px 48px;background:#fff}
-  .mcards__h{font-family:'Unbounded',sans-serif;font-weight:800;font-size:32px;line-height:1.05;letter-spacing:-.04em;text-align:center;margin:0 0 22px;padding-top:24px}
+  .mcards{padding:4px 20px 48px;background:#fff}
+  @media (max-width:640px){.mcards{position:relative;z-index:5;margin-top:calc(-100dvh + 16vh)}}   /* секция карточек заезжает на последний (уже белый) экран сцены — пустого экрана нет */
+  .mcards__h{font-family:'Unbounded',sans-serif;font-weight:800;font-size:32px;line-height:1.05;letter-spacing:-.04em;text-align:center;margin:0 0 22px;padding-top:36px}
   .mcards .cards{position:static;transform:none;width:auto;display:flex;flex-direction:column;gap:14px;perspective:none;pointer-events:auto}
   .mcards .dir{opacity:0!important;transform:perspective(1100px) rotateY(-84deg) scale(.94)!important;transform-origin:50% 50%;transition:transform .9s cubic-bezier(.2,.7,.2,1),opacity .5s;border-radius:24px;padding:12px 12px 22px}
   .mcards .dir.shown{opacity:1!important;transform:perspective(1100px) rotateY(0) scale(1)!important}   /* карточка разворачивается на месте, когда доезжает до экрана (не `.in` — это класс полей формы) */
@@ -302,7 +303,7 @@
   @media (max-width:640px){
     .top{height:64px;padding:0 20px}
     .page{padding-top:64px;--gutter:20px}
-    .journey{height:360vh}          /* путь 87% прокрутки (313vh), хвост 47vh — белая волна поднимается весь хвост */
+    .journey{height:340vh}          /* путь 96% прокрутки, хвост 14vh — только белая волна, дальше сразу заголовок и карточки */
     .pr__space{height:150vh}        /* принципы на телефоне: разбор → пауза → сбор; растворение — по входу контактов снизу, без пустого экрана */
     .stick{top:0;height:100dvh;padding:0;min-height:0}   /* динамическая высота: низ сцены всегда совпадает с низом экрана */
     .plate{border-radius:0}
@@ -340,7 +341,7 @@
     .f-plate .fact{width:max-content;max-width:min(360px, calc(100vw - 48px));padding:24px 26px 26px;border-radius:24px;background:rgba(243,241,234,.94)}   /* по содержимому: не закрывает сцену целиком */
 
     .final{padding-top:186px}
-    .final--2{padding-top:0;top:auto;bottom:6vh;align-items:flex-end;color:var(--ink)}   /* на телефоне заголовок приезжает на белой волне, внизу экрана; карточки — сразу за ним */
+    .final--2{padding-top:0;top:auto;bottom:3vh;align-items:flex-end;color:var(--ink)}   /* на телефоне заголовок приезжает на белой волне, внизу экрана; карточки — сразу за ним */
     .final h2{font-size:32px;max-width:11ch}
     .final p{margin-top:14px;font-size:14px}
 
@@ -357,7 +358,7 @@
     .pr{height:auto}
     .pr__stick{position:sticky;top:0;height:100dvh;padding:0}
     .pr__plate{height:100%;border-radius:0}
-    .pr__head{position:absolute;left:20px;right:20px;top:72px;transform:none;max-width:none;text-align:center}
+    .pr__head{position:absolute;left:20px;right:20px;top:64px;transform:none;max-width:none;text-align:center}
     .pr__head h2{font-size:32px}
     .pr__head .sub{font-size:14px;margin-top:14px;max-width:none}
     .pr__lbl{font-size:16px;white-space:nowrap;max-width:none;gap:8px;line-height:1.16;transform:translate(-50%,0);justify-content:center;text-align:center}
@@ -605,7 +606,10 @@
 /* узкий экран определяем один раз: карточки физически переезжают в DOM, поэтому менять решение на лету нельзя */
 window.NARROW = innerWidth <= 640;
 if (window.NARROW) {
-  document.getElementById('mcards').appendChild(document.getElementById('cards'));
+  var mc = document.getElementById('mcards'), f2 = document.getElementById('final2');
+  var mh = document.createElement('h2'); mh.className = 'mcards__h'; mh.innerHTML = f2.querySelector('h2').innerHTML;   // заголовок — над карточками, а не в сцене
+  mc.appendChild(mh); f2.remove();
+  mc.appendChild(document.getElementById('cards'));
   var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('shown'); io.unobserve(e.target); } }); }, { threshold: 0.35 });
   document.querySelectorAll('.mcards .dir').forEach(function (d) { io.observe(d); });
 }
@@ -912,7 +916,7 @@ function fovFor(base) {
   const A = 2.0;
   if (camera.aspect >= A) return base;
   const t = Math.tan(THREE.MathUtils.degToRad(base) / 2) * (A / camera.aspect);
-  return Math.min(80, THREE.MathUtils.radToDeg(Math.atan(t) * 2));
+  return Math.min(58, THREE.MathUtils.radToDeg(Math.atan(t) * 2));   // не шире 58°: у широкого угла сфера вне центра кадра рисуется эллипсом
 }
 const _sz = new THREE.Vector2();
 function resize() {
@@ -979,7 +983,7 @@ function frame() {
   fpsN++; if (t - fpsT >= 1) { fpsEl.textContent = Math.round(fpsN / (t - fpsT)) + ' fps'; fpsN = 0; fpsT = t; }
   if (auto) autoStep();
   const pRaw = progress();
-  const PE = NARROW ? 0.905 : 0.672;                                    // доля прокрутки на путь шара; на телефоне длиннее — цифры успевают показаться
+  const PE = NARROW ? 0.96 : 0.672;                                    // доля прокрутки на путь шара; на телефоне длиннее — цифры успевают показаться
   const p = Math.min(1, pRaw / PE);                                    // путь шара
   const q = Math.min(1, Math.max(0, (pRaw - PE) / (1 - PE)));          // заголовок → карточки
   if (forced === null) ui.path.value = pRaw.toFixed(3);
@@ -1073,11 +1077,11 @@ function frame() {
   const fa = smooth(Math.min(1, Math.max(0, (-51 - bz) / 7)));
   /* второй заголовок и карточки */
   const rise = smooth(Math.min(1, Math.max(0, (q - (NARROW ? 0.34 : 0.3)) / 0.14)));              // карточка идёт сразу за заголовком
-  const waveK = smooth(Math.min(1, Math.max(0, (q - (NARROW ? 0.05 : 0.35)) / (NARROW ? 0.9 : 0.2))));             // белая волна сразу за ней
+  const waveK = smooth(Math.min(1, Math.max(0, (q - (NARROW ? 0.0 : 0.35)) / (NARROW ? 1.0 : 0.2))));             // белая волна сразу за ней
   const spin = smooth(Math.min(1, Math.max(0, (q - 0.52) / 0.34)));             // оборот длиннее
   const sides = smooth(Math.min(1, Math.max(0, (q - 0.5) / 0.2)));              // боковые выезжают с началом оборота и висят, пока он идёт
   if (HAS_F2 && NARROW) {                                                     // телефон: заголовок проявляется внизу, когда волна уже белая под ним
-    const fk = smooth(Math.min(1, Math.max(0, (waveK - 0.55) / 0.3)));
+    const fk = smooth(Math.min(1, Math.max(0, (waveK - 0.6) / 0.35)));
     final2.style.opacity = fk.toFixed(3);
     final2.style.transform = 'translateY(' + ((1 - fk) * 24).toFixed(1) + 'px)';
   } else if (HAS_F2) {
@@ -1116,9 +1120,9 @@ function frame() {
 
   /* камера: 3/4 на кольцо → низко, за шаром, под большой аркой */
   /* на узком экране: камера дальше, смотрит выше колец — текст сверху, скульптура в нижней половине */
-  const cam0 = _p.set((NARROW ? 5.4 : 0) + cur.x * 0.9, 8.9 - cur.y * 0.4, NARROW ? 16.5 : 23.5), look0 = _p2.set(NARROW ? 5.4 : 0.6, NARROW ? 13.2 : 8.2, 0);   // на телефоне: крупно и в нижней части экрана, как фон   // на телефоне камера ближе: скульптура крупная, занимает низ экрана
-  const cam1 = new THREE.Vector3((NARROW ? bx : bx * 0.5 + 3.0 * (1 - endK) + bx * 0.5 * endK) + cur.x * 0.9 * mouseK, 1.15 + 0.5 * endK - cur.y * 0.25 * mouseK, bz + (NARROW ? 7.5 : CAM_BACK));   // на телефоне камера ближе: предыдущие ворота уходят за спину раньше, чем показывается следующая цифра
-  const look1 = new THREE.Vector3(NARROW ? bx * 0.7 + pathX(bz - 9) * 0.3 : (pathX(bz - 9) * 0.6 - 1.2) * (1 - endK) + bx * endK, (NARROW ? 8.8 : 4.6) - (NARROW ? 6.7 : 3.3) * endK, bz - 9);   // на телефоне камера смотрит выше: мяч в нижней трети   // на пути камера смотрит выше: мяч и ворота уходят вниз, цифры ближе к середине; в финале прежняя раскадровка
+  const cam0 = _p.set((NARROW ? 5.4 : 0) + cur.x * 0.9, 8.9 - cur.y * 0.4, NARROW ? 21 : 23.5), look0 = _p2.set(NARROW ? 5.4 : 0.6, NARROW ? 12.6 : 8.2, 0);   // на телефоне: крупно и в нижней части экрана, как фон   // на телефоне камера ближе: скульптура крупная, занимает низ экрана
+  const cam1 = new THREE.Vector3((NARROW ? bx : bx * 0.5 + 3.0 * (1 - endK) + bx * 0.5 * endK) + cur.x * 0.9 * mouseK, 1.15 + 0.5 * endK - cur.y * 0.25 * mouseK, bz + (NARROW ? 10.5 : CAM_BACK));   // телефон: камера дальше, угол уже — мяч круглый   // на телефоне камера ближе: предыдущие ворота уходят за спину раньше, чем показывается следующая цифра
+  const look1 = new THREE.Vector3(NARROW ? bx * 0.7 + pathX(bz - 9) * 0.3 : (pathX(bz - 9) * 0.6 - 1.2) * (1 - endK) + bx * endK, (NARROW ? 8.2 : 4.6) - (NARROW ? 6.1 : 3.3) * endK, bz - 9);   // на телефоне камера смотрит выше: мяч в нижней трети   // на пути камера смотрит выше: мяч и ворота уходят вниз, цифры ближе к середине; в финале прежняя раскадровка
   camera.position.lerpVectors(cam0, cam1, k);
   camera.lookAt(look0.lerp(look1, k));
   camera.fov = fovFor(28 + (50 - 28) * k); camera.updateProjectionMatrix();
@@ -1243,7 +1247,7 @@ renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFShadowMap;
 renderer.toneMapping = THREE.NoToneMapping; renderer.outputColorSpace = THREE.SRGBColorSpace;
 const scene = new THREE.Scene();
 scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(renderer), 0.04).texture;
-const camera = new THREE.PerspectiveCamera(30, 2, 0.1, 100); camera.position.set(0, 0.8, NARROW ? 29 : 26); camera.lookAt(0, 0, 0);
+const camera = new THREE.PerspectiveCamera(30, 2, 0.1, 100); camera.position.set(0, 0.8, NARROW ? 38 : 26); camera.lookAt(0, 0, 0);
 function pFov(base) { const A = 2.0; if (camera.aspect >= A) return base; const t = Math.tan(THREE.MathUtils.degToRad(base) / 2) * (A / camera.aspect); return Math.min(72, THREE.MathUtils.radToDeg(Math.atan(t) * 2)); }
 scene.add(new THREE.HemisphereLight(0xfff8ee, 0xd9cbb2, 0.45));
 const key = new THREE.DirectionalLight(0xfff4e6, 1.5); key.position.set(-6, 12, 40); key.castShadow = true;   // почти фронтально — тень на стене короткая
@@ -1262,7 +1266,7 @@ const group = new THREE.Group(); scene.add(group);
 let spreadX = 4.6;                                        // насколько слои уезжают влево при разборе
 function place() {                                        // раскладка по ширине плашки: справа должно хватать места подписям
   const w = plate.clientWidth;
-  if (w <= 640) { group.position.set(0, -1.4, 0); group.scale.setScalar(0.66); spreadX = 0; }   // на телефоне слои по центру и ниже заголовка, подписи под ними
+  if (w <= 640) { group.position.set(0, -2.6, 0); group.scale.setScalar(0.62); spreadX = 0; }   // на телефоне слои по центру и ниже заголовка, подписи под ними
   else if (w <= 1100) { group.position.set(2.6, 0, 0); group.scale.setScalar(0.76); spreadX = 3.4; }   // планшет: правее и мельче, чтобы не лезть на заголовок
   else { group.position.set(4.6, 0, 0); group.scale.setScalar(1); spreadX = 4.6; }
 }
@@ -1311,7 +1315,7 @@ function frame() {
   group.rotation.x = 0.18 * (1 - K) + cur.y * 0.06;
   if (plate.clientWidth <= 640) group.scale.setScalar(0.66 * (1.45 - 0.45 * K));   // телефон: собранный конус крупный, разложенный — компактный
   const under = plate.clientWidth <= 640;                   // подписи под слоями (телефон) или справа (десктоп)
-  const GAP = under ? 5.4 : 1.7;          // расстояние между разведёнными слоями; на телефоне колонка на весь экран
+  const GAP = under ? 7.2 : 1.7;          // расстояние между разведёнными слоями; на телефоне колонка на весь экран
   /* общая вертикаль подписей: правый край самого большого слоя в разобранном виде */
   _v.set(LEN[0] * 0.5 * 0.66 + (plate.clientWidth <= 640 ? 1.1 : 1.9), 0, 0); parts[0].m.localToWorld(_v); _v.project(camera);   // зазор от синего бруса до цифры
   const labelX = (_v.x * 0.5 + 0.5) * plate.clientWidth;
