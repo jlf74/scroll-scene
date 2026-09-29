@@ -392,14 +392,17 @@
   /* загрузка: кремовый экран с логотипом, уходит, когда шрифты и сцена готовы; обложка проявляется по частям */
   .loader{position:fixed;inset:0;z-index:100;background:var(--cream);display:flex;align-items:center;justify-content:center;transition:opacity .6s ease}
   .loader.gone{opacity:0;pointer-events:none}
-  .loader__in{display:flex;flex-direction:column;align-items:center;gap:22px}
-  .loader__logo{font-family:'Unbounded',sans-serif;font-weight:800;font-size:30px;letter-spacing:-.02em;color:var(--ink)}
-  .loader__dot{width:14px;height:14px;border-radius:50%;background:var(--c1);animation:ld 1.1s ease-in-out infinite}
+  /* вариант D (выбор Юли 29.09): проценты фирменным шрифтом, приглушённые, внизу полоса четырёх цветов группы */
+  .loader__num{font-family:'Unbounded',sans-serif;font-weight:800;font-size:clamp(72px,12vw,128px);letter-spacing:-.05em;line-height:1;color:var(--mute);opacity:.55;font-variant-numeric:tabular-nums}
+  .loader__cap{position:absolute;left:24px;bottom:24px;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--mute);font-weight:600}
+  .loader__bar{position:absolute;left:0;right:0;bottom:0;height:8px;background:var(--line)}
+  .loader__bar i{position:absolute;inset:0;background:linear-gradient(90deg,var(--accent) 0 25%,var(--c2) 0 50%,var(--c3) 0 75%,var(--c6) 0);clip-path:inset(0 100% 0 0)}
+  @media (max-width:640px){.loader__cap{left:20px;bottom:22px;font-size:11px}}
   @keyframes ld{0%,100%{transform:scale(1);opacity:.55}50%{transform:scale(1.5);opacity:1}}
   .hero__t>*,.hero__foot>span{opacity:0;transform:translateY(16px);transition:opacity .7s ease,transform .8s cubic-bezier(.2,.7,.2,1)}
   .hero__t>*:nth-child(2){transition-delay:.08s}.hero__t>*:nth-child(3){transition-delay:.16s}.hero__t>*:nth-child(4){transition-delay:.24s}.hero__foot>span{transition-delay:.4s}
   .ready .hero__t>*,.ready .hero__foot>span{opacity:1;transform:none}
-  @media (prefers-reduced-motion:reduce){.loader{transition:none}.loader__dot{animation:none}.hero__t>*,.hero__foot>span{transition:none;opacity:1;transform:none}}
+  @media (prefers-reduced-motion:reduce){.loader{transition:none}.hero__t>*,.hero__foot>span{transition:none;opacity:1;transform:none}}
 
   /* письмо: окошко с адресом — mailto на компьютере без почтовой программы открывает системный диалог */
   .mail{position:fixed;inset:0;z-index:90;display:flex;align-items:center;justify-content:center;padding:20px}
@@ -422,7 +425,7 @@
   .ref .page{width:100vw}.ref .journey{height:100vh}.ref .stick{position:static;height:100vh;padding:0;min-height:0}.ref .plate{border-radius:0}
 </style>
 
-<div class="loader" id="loader" aria-hidden="true"><div class="loader__in"><span class="loader__logo">STRONG</span><i class="loader__dot"></i></div></div>
+<div class="loader" id="loader" aria-hidden="true"><span class="loader__num" id="loaderNum">0</span><span class="loader__cap">Коммуникационная группа STRONG</span><div class="loader__bar"><i id="loaderBar"></i></div></div>
 
 <div class="mail" id="mail" hidden>
   <div class="mail__bg" data-mail-close></div>
@@ -545,17 +548,29 @@
 
 <script src="vendor/leaflet/leaflet.js"></script>
 <script>
-/* загрузка: экран уходит, когда страница и шрифты готовы, но не раньше 0.8 с; обложка проявляется по частям */
+/* загрузка: счётчик идёт к 90%, пока грузятся страница и шрифты, потом добегает до 100 и экран уходит; обложка проявляется по частям */
 (function () {
-  var L = document.getElementById('loader'), page = document.querySelector('.page'), t0 = performance.now(), done = false;
+  var L = document.getElementById('loader'), num = document.getElementById('loaderNum'), bar = document.getElementById('loaderBar'), page = document.querySelector('.page');
+  var t0 = performance.now(), done = false, p = 0, target = 90, last = t0;
   function go() {
     if (done) return; done = true;
-    var wait = Math.max(0, 800 - (performance.now() - t0));
-    setTimeout(function () { L.classList.add('gone'); page.classList.add('ready'); setTimeout(function () { L.remove(); }, 700); }, wait);
+    L.classList.add('gone'); page.classList.add('ready'); setTimeout(function () { L.remove(); }, 700);
   }
+  function tick(t) {
+    if (done) return;
+    var dt = Math.min(64, t - last) / 1000; last = t;
+    p += (target - p) * Math.min(1, dt * (target === 100 ? 9 : 2.2));      // к 90 неспешно (~1.2 с), к 100 — быстро
+    if (target === 100 && p > 99.2) p = 100;
+    var v = Math.round(p); num.textContent = v; bar.style.clipPath = 'inset(0 ' + (100 - p) + '% 0 0)';
+    if (p >= 100 && t - t0 >= 1100) { setTimeout(go, 160); return; }       // 100 показываем чуть-чуть, потом уходим
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
   var fonts = (document.fonts && document.fonts.ready) ? document.fonts.ready : Promise.resolve();
-  if (document.readyState === 'complete') fonts.then(go); else addEventListener('load', function () { fonts.then(go); });
-  setTimeout(go, 4000);                                                    // страховка: что бы ни случилось, экран не висит
+  function ready() { target = 100; }
+  if (document.readyState === 'complete') fonts.then(ready); else addEventListener('load', function () { fonts.then(ready); });
+  setTimeout(ready, 4000);                                                 // страховка: что бы ни случилось, экран не висит
+  setTimeout(go, 6000);
 })();
 
 /* письмо: окошко с адресом, копирование, запасные пути */
