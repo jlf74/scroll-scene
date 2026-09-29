@@ -154,7 +154,7 @@
 
   /* цитата с объёмными знаками: текст стоит на месте с самого начала, меняется только подложка */
   .quote{position:relative}
-  .quote__space{height:22vh}   /* распорка: раскрытый на весь экран блок держится на месте (sticky) 22vh прокрутки, потом едет дальше. Именно блок, не padding: sticky не может уйти в отступ родителя */
+  .quote__space{height:70vh}   /* распорка: раскрытый на весь экран блок держится на месте (sticky) 70vh прокрутки, потом едет дальше; 22vh было не заметно. Именно блок, не padding: sticky не может уйти в отступ родителя */
   .quote__stick{position:sticky;top:0;min-height:100vh;padding:120px 0;display:flex;flex-direction:column;justify-content:center}   /* ровно экран: иначе прилипание не видно, текст уезжает за кадр */
   .quote__bg{position:absolute;z-index:0;background:var(--plate);top:calc(24px * (1 - var(--qk,0)));bottom:calc(24px * (1 - var(--qk,0)));left:calc(max(24px, 50vw - 696px) * (1 - var(--qk,0)));right:calc(max(24px, 50vw - 696px) * (1 - var(--qk,0)));border-radius:calc(40px * (1 - var(--qk,0)))}
   .quote .phrase,.quote .q-foot{position:relative;z-index:1;margin-left:max(88px, calc(50vw - 608px))}
@@ -343,7 +343,7 @@
     .final p{margin-top:14px;font-size:14px}
 
     .quote__stick{position:sticky;top:0;padding:72px 0;min-height:100dvh;justify-content:center}
-    .quote__space{height:18vh}   /* и на телефоне бежевый блок держится, прежде чем уехать */
+    .quote__space{height:45vh}   /* и на телефоне бежевый блок держится, прежде чем уехать */
     .quote__bg{left:0;right:0;top:0;bottom:0;border-radius:0}
     .quote .phrase,.quote .q-foot{margin-left:20px;margin-right:20px}
     .phrase{font-size:26px;line-height:1.16}
@@ -393,8 +393,8 @@
 <div class="page">
   <header class="top">
     <a class="logo" href="#" data-go="top">STRONG</a>
-    <nav id="nav"><a href="#" data-go="dirs">Направления</a><a href="#" data-go="prs">Принципы</a><a href="#" data-go="ct">Контакты</a><a class="m-only m-tel" href="tel:+74957880680">+7 (495) 788-0680</a><a class="m-only m-btn" href="#" data-go="ct">Напишите нам письмо!</a></nav>
-    <div class="r"><a class="tel" href="tel:+74957880680">+7 (495) 788-0680</a><a class="pill" href="#" data-go="ct">Напишите нам письмо!</a>
+    <nav id="nav"><a href="#" data-go="dirs">Направления</a><a href="#" data-go="prs">Принципы</a><a href="#" data-go="ct">Контакты</a><a class="m-only m-tel" href="tel:+74957880680">+7 (495) 788-0680</a><a class="m-only m-btn" href="mailto:rastrong@ros-tv.com">Напишите нам письмо!</a></nav>
+    <div class="r"><a class="tel" href="tel:+74957880680">+7 (495) 788-0680</a><a class="pill" href="mailto:rastrong@ros-tv.com">Напишите нам письмо!</a>
       <button class="burger" id="burger" aria-label="Меню" aria-expanded="false"><span></span><span></span></button></div>
   </header>
 
@@ -414,7 +414,7 @@
             <span><i style="background:var(--c2)"></i>ART UNION</span>
             <span><i style="background:var(--c6)"></i>NEWIDEAS</span>
           </div>
-          <div class="hero__b"><a class="pill pill--ink" href="#">Напишите нам письмо!</a></div>
+          <div class="hero__b"><a class="pill pill--ink" href="mailto:rastrong@ros-tv.com">Напишите нам письмо!</a></div>
         </div>
         <div class="hero__foot" id="heroF"><span class="scroll">Скролл<i>↓</i></span><span>member of igronik group</span></div>
 
@@ -501,7 +501,7 @@
 (function () {
   if (!window.L) return;
   var m = L.map('map', { scrollWheelZoom: false, attributionControl: true }).setView([55.7384, 37.6147], 16);
-  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap' }).addTo(m);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { maxZoom: 19, subdomains: 'abcd', attribution: '&copy; OpenStreetMap &copy; CARTO' }).addTo(m);   // стиль Voyager: цветной, спокойный, без красных пунктиров границ районов
   L.marker([55.7384, 37.6147], { icon: L.divIcon({ className: 'pin', html: '<i></i>', iconSize: [26, 26], iconAnchor: [13, 26], popupAnchor: [0, -24] }) }).addTo(m)
     .bindPopup('<b>STRONG</b><br>Москва, ул. Большая Якиманка, д. 22');
   /* контейнер меняет размер (адаптив, панель браузера) — без пересчёта карта показывает не тот участок */
