@@ -231,7 +231,6 @@
   @media (max-width:640px){.mcards{position:relative;z-index:5;margin-top:-80svh;padding-top:24px}   /* секция поднимается из-под низа экрана поверх сцены; к концу сцены её верх на 20% экрана */
     .mcards::before{content:'';position:absolute;left:0;right:0;bottom:calc(100% - 1px);height:18vh;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 120' preserveAspectRatio='none'%3E%3Cpath d='M0,92 C300,10 620,118 900,52 C1120,4 1320,70 1440,44 L1440,121 L0,121 Z' fill='%23fff'/%3E%3C/svg%3E") center bottom/100% 100% no-repeat}   /* волнистый верх — та же кривая, что у волны сцены */
   }
-  @media (max-width:640px){
   .mcards__h{font-family:'Unbounded',sans-serif;font-weight:800;font-size:32px;line-height:1.05;letter-spacing:-.04em;text-align:center;margin:0 0 22px;padding-top:36px}
   .mcards .cards{position:static;transform:none;width:auto;display:flex;flex-direction:column;gap:14px;perspective:none;pointer-events:auto}
   .mcards .dir{opacity:0!important;transform:perspective(1100px) rotateY(-84deg) scale(.94)!important;transform-origin:50% 50%;transition:transform .9s cubic-bezier(.2,.7,.2,1),opacity .5s;border-radius:24px;padding:12px 12px 22px}
