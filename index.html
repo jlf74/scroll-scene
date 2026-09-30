@@ -705,14 +705,23 @@ if (window.NARROW) {
   /* колесо: любое движение — шаг. В покое едем сразу; в пути (после первой трети) ставим следующий шаг в очередь,
      чтобы намеренное второе движение не пропадало, а хвост инерции тачпада сразу после старта — не считался */
   var TOUCH = matchMedia('(pointer: coarse)').matches;                  // тач-устройство: колесо не перехватываем (мышь к планшету — редкость, а тачпад-события с пером мешают)
-  function endY() { return pts[pts.length - 1][1]; }                            // последняя точка (верх контактов): ниже неё страница прокручивается сама
-  function freeZone(d) { return (d > 0 && scrollY >= endY() - 2) || (d < 0 && scrollY > endY() + 2); }   // вниз от последней точки и вверх до неё — без перехвата
+  /* свободная зона: от последней точки (верх контактов) и ниже страница прокручивается сама. Режим с гистерезисом, а не проверка
+     «где сейчас»: родной шаг колеса может проскочить точку вверх на полэкрана, и без режима следующий шаг вниз полз бы обратно к точке */
+  var free = false;
+  function endY() { return pts[pts.length - 1][1]; }
+  function freeStep(d, e) {                                                       // true — событие обработано (или отдано браузеру), дальше не перехватывать
+    var ey = endY();
+    if (scrollY >= ey - 2) free = true; else if (scrollY < ey - 300) free = false;   // доехали до контактов — свободно; ушли выше на 300px (меню, «Home») — снова по точкам
+    if (!free) return false;
+    if (d < 0 && scrollY <= ey + 2) { free = false; e.preventDefault(); go(d === -99 ? 0 : pts.length - 2); }   // от верха контактов вверх — шаг к принципам
+    return true;
+  }
   addEventListener('wheel', function (e) {
     if (TOUCH) return;
     if (e.target.closest && e.target.closest('.ct__map, .mail')) return;
     var dy = e.deltaY * (e.deltaMode === 1 ? 40 : e.deltaMode === 2 ? innerHeight : 1);   // Firefox шлёт строки, а не пиксели
     if (!busy) pts = points();                                                    // позиции считаем перед шагом: документ после загрузки меняет высоту (шрифты, карта)
-    if (!busy && freeZone(dy > 0 ? 1 : -1)) return;
+    if (!busy && freeStep(dy > 0 ? 1 : -1, e)) return;
     e.preventDefault();
     if (Math.abs(dy) < 4) return;
     var now = performance.now(), gap = now - lastWheel; lastWheel = now;          // события ближе 200 мс друг к другу — один жест (щелчок колеса, поток тачпада с инерцией)
@@ -726,7 +735,7 @@ if (window.NARROW) {
     var d = { ArrowDown: 1, PageDown: 1, ' ': 1, ArrowUp: -1, PageUp: -1, Home: -99, End: 99 }[e.key];
     if (d === undefined || (e.target.matches && e.target.matches('input,textarea'))) return;
     if (!busy) pts = points();
-    if (!busy && freeZone(d > 0 ? 1 : -1)) return;
+    if (!busy && freeStep(d, e)) return;
     e.preventDefault(); if (busy) { queued = d > 0 ? 1 : -1; return; } go(nearest() + d);
   });
   /* тач-экраны (телефон, планшет): родная прокрутка с инерцией — перехват свайпа держал страницу, пока палец на экране, и дёргал её после */
