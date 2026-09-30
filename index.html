@@ -203,6 +203,10 @@
   .consent{display:flex;align-items:flex-start;gap:12px;font-size:13px;line-height:1.45;color:var(--mute)}
   .consent input{width:20px;height:20px;margin:1px 0 0;flex:0 0 auto;accent-color:var(--ink)}
   .consent a{text-decoration:underline}
+  .ct__note{margin:0;font-size:14px;line-height:1.45;color:var(--mute)}
+  .ct__note.ok{color:var(--c2);font-weight:600}
+  .ct__note.err{color:var(--c1)}
+  .in.bad{border-color:var(--c1)}
   .ct__f .pill{align-self:flex-start;background:var(--c1);color:#fff;padding:0 40px;margin-top:6px}
   .foot{position:relative;z-index:6;will-change:transform;background:var(--accent);color:#fff;padding:22px var(--gutter);display:flex;align-items:center;justify-content:space-between;gap:24px;font-size:13px}
   .foot__l{display:flex;align-items:baseline;gap:18px}
@@ -516,12 +520,14 @@
         <div><small>Почта</small><div><a href="mailto:rastrong@ros-tv.com" data-mail>rastrong@ros-tv.com</a></div></div>   <!-- адрес и телефоны убраны по просьбе Дмитрия (30.09): только почта -->
       </div>
     </div>
-    <form class="ct__f" onsubmit="return false">
-      <input class="in" type="text" placeholder="Имя">
-      <input class="in" type="email" placeholder="Эл. почта">
-      <textarea class="in" placeholder="Сообщение"></textarea>
-      <label class="consent"><input type="checkbox"><span>Нажимая «Отправить», я соглашаюсь с <a href="#">политикой обработки персональных данных</a></span></label>
+    <form class="ct__f" id="ctForm" action="send.php" method="post" novalidate>
+      <input class="in" type="text" name="name" placeholder="Имя" required autocomplete="name">
+      <input class="in" type="email" name="email" placeholder="Эл. почта" required autocomplete="email">
+      <textarea class="in" name="message" placeholder="Сообщение" required></textarea>
+      <input type="text" name="site" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">   <!-- ловушка для ботов: люди это поле не видят -->
+      <label class="consent"><input type="checkbox" name="consent" required><span>Нажимая «Отправить», я соглашаюсь с <a href="#">политикой обработки персональных данных</a></span></label>
       <button class="pill" type="submit">Отправить</button>
+      <p class="ct__note" id="ctNote" role="status" aria-live="polite" hidden></p>
     </form>
   </section>
 
@@ -568,6 +574,22 @@
   document.querySelectorAll('[data-mail]').forEach(function (a) { a.addEventListener('click', function (e) { e.preventDefault(); open(); }); });
   M.querySelectorAll('[data-mail-close]').forEach(function (a) { a.addEventListener('click', function () { close(); }); });
   addEventListener('keydown', function (e) { if (e.key === 'Escape' && !M.hidden) close(); });
+  /* форма: отправка в send.php без перезагрузки; сервер шлёт письмо и отвечает JSON */
+  var F = document.getElementById('ctForm'), note = document.getElementById('ctNote');
+  function say(t, cls) { note.textContent = t; note.className = 'ct__note ' + (cls || ''); note.hidden = !t; }
+  F.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var bad = false;
+    ['name', 'email', 'message'].forEach(function (n) { var el = F.elements[n]; var v = el.value.trim(); var ok = v && (n !== 'email' || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)); el.classList.toggle('bad', !ok); if (!ok) bad = true; });
+    if (bad) { say('Заполните имя, почту и сообщение.', 'err'); return; }
+    if (!F.elements.consent.checked) { say('Нужно согласие на обработку персональных данных.', 'err'); return; }
+    var btn = F.querySelector('[type=submit]'); btn.disabled = true; say('Отправляем…');
+    fetch(F.action, { method: 'POST', body: new FormData(F), headers: { 'Accept': 'application/json' } })
+      .then(function (r) { return r.json(); })
+      .then(function (d) { if (d && d.ok) { say('Спасибо! Письмо отправлено, мы ответим вам на почту.', 'ok'); F.reset(); } else { say((d && d.error) || 'Не получилось отправить. Напишите нам на rastrong@ros-tv.com', 'err'); } })
+      .catch(function () { say('Не получилось отправить. Напишите нам на rastrong@ros-tv.com', 'err'); })
+      .then(function () { btn.disabled = false; });
+  });
   M.querySelector('[data-mail-form]').addEventListener('click', function (e) { e.preventDefault(); close(); setTimeout(function () { document.querySelector('.ct').scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 200); });
   copyBtn.addEventListener('click', function () {
     var ok = function () { copyBtn.textContent = 'Скопировано ✓'; setTimeout(function () { copyBtn.textContent = 'Скопировать адрес'; }, 1800); };
