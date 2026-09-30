@@ -228,7 +228,7 @@
   .mcards:empty{display:none}
   /* карточки направлений: на узком экране JS переносит их сюда из сцены — в 3D-полёте на телефоне они не читаются */
   .mcards{padding:4px 20px 48px;background:#fff}
-  @media (max-width:640px){.mcards{position:relative;z-index:5;margin-top:calc(-100dvh + 16vh)}}   /* секция карточек заезжает на последний (уже белый) экран сцены — пустого экрана нет */
+  @media (max-width:640px){.mcards{position:relative;z-index:5;margin-top:calc(-100svh + 16vh)}}   /* секция карточек заезжает на последний (уже белый) экран сцены — пустого экрана нет */
   .mcards__h{font-family:'Unbounded',sans-serif;font-weight:800;font-size:32px;line-height:1.05;letter-spacing:-.04em;text-align:center;margin:0 0 22px;padding-top:36px}
   .mcards .cards{position:static;transform:none;width:auto;display:flex;flex-direction:column;gap:14px;perspective:none;pointer-events:auto}
   .mcards .dir{opacity:0!important;transform:perspective(1100px) rotateY(-84deg) scale(.94)!important;transform-origin:50% 50%;transition:transform .9s cubic-bezier(.2,.7,.2,1),opacity .5s;border-radius:24px;padding:12px 12px 22px}
@@ -345,9 +345,9 @@
     .final h2{font-size:32px;max-width:11ch}
     .final p{margin-top:14px;font-size:14px}
 
-    .quote__stick{position:sticky;top:0;padding:72px 0;min-height:100dvh;justify-content:center}
+    .quote__stick{position:sticky;top:0;padding:72px 0;min-height:100svh;justify-content:center}   /* svh, не dvh: единицы в потоке страницы не должны плыть с панелью браузера — иначе документ прыгает под пальцем */
     .quote__space{height:45vh}   /* и на телефоне бежевый блок держится, прежде чем уехать */
-    .quote__bg{left:0;right:0;top:0;bottom:0;border-radius:0}
+    .quote__bg{left:0;right:0;top:0;bottom:calc(100svh - 100lvh);border-radius:0}   /* бежевый дотягивается до низа экрана и со спрятанной панелью */
     .quote .phrase,.quote .q-foot{margin-left:20px;margin-right:20px}
     .phrase{font-size:26px;line-height:1.16}
     .phrase .b{width:1em;height:1em;margin:0 .1em}
@@ -356,7 +356,7 @@
     .quote__bg{left:calc(12px * (1 - var(--qk,0)));right:calc(12px * (1 - var(--qk,0)));top:calc(12px * (1 - var(--qk,0)));bottom:calc(12px * (1 - var(--qk,0)));border-radius:calc(24px * (1 - var(--qk,0)))}
 
     .pr{height:auto}
-    .pr__stick{position:sticky;top:0;height:100dvh;padding:0}
+    .pr__stick{position:sticky;top:0;height:100svh;padding:0}
     .pr__plate{height:100%;border-radius:0}
     .pr__head{position:absolute;left:20px;right:20px;top:64px;transform:none;max-width:none;text-align:center}
     .pr__head h2{font-size:32px}
@@ -946,7 +946,11 @@ function fitAspect() {                                                       // 
   if (r.width < 1 || r.height < 1) return;
   if (Math.abs(r.width - _cr.w) > 0.25 || Math.abs(r.height - _cr.h) > 0.25) { _cr.w = r.width; _cr.h = r.height; camera.aspect = r.width / r.height; camera.updateProjectionMatrix(); }
 }
-resize(); window.addEventListener('resize', resize);
+resize();
+window.addEventListener('resize', function () {                              // на телефоне событие resize летит при каждом движении панели браузера — буфер пересоздаём только при смене ширины или повороте
+  renderer.getSize(_sz); const r = plate.getBoundingClientRect();
+  if (Math.abs(r.width - _sz.x) > 0.75 || Math.abs(r.height - _sz.y) > _sz.y * 0.2) resize(); else fitAspect();
+});
 /* слово STRONG: ширина 94% плашки */
 const bigword = document.getElementById('bigword');
 function fitWord() { bigword.style.fontSize = '100px'; const w = bigword.firstElementChild.getBoundingClientRect().width || 1; bigword.style.fontSize = (100 * plate.clientWidth * 0.94 / w).toFixed(1) + 'px'; }   // меряем сам текст, не блок во всю ширину
@@ -1129,7 +1133,7 @@ function frame() {
   plate.parentElement.style.setProperty('--k', smooth(Math.min(1, p / 0.08)).toFixed(3));   // рамка уходит во весь экран быстрее колец: за 8% пути вместо 22%
   pageEl.classList.toggle('onscene', k > 0.5);                                   // с появлением арок подложка шапки исчезает
   renderer.getSize(_sz); const pr_ = plate.getBoundingClientRect();
-  if (Math.abs(pr_.width - _sz.x) > 0.75 || Math.abs(pr_.height - _sz.y) > 0.75) resize(); else fitAspect();   // размер канваса всегда равен плашке, иначе мяч вытягивается в овал   // плашка меняет высоту — мяч не должен становиться овалом
+  if (Math.abs(pr_.width - _sz.x) > 0.75 || Math.abs(pr_.height - _sz.y) > _sz.y * 0.2) resize(); else fitAspect();   // высота на телефоне плывёт с панелью браузера (100dvh) — буфер не трогаем, иначе setSize на каждом кадре и рывки; круг держит fitAspect   // размер канваса всегда равен плашке, иначе мяч вытягивается в овал   // плашка меняет высоту — мяч не должен становиться овалом
 
   sats.forEach(({ a, s }) => { a.getWorldPosition(_p); s.position.copy(_p); s.scale.setScalar(Math.max(0.001, 1 - k * 1.6)); s.visible = k < 0.6; });
 
@@ -1292,8 +1296,13 @@ const parts = COLORS.map((hex, i) => {
   const y0 = -3.0 + i * STEP + (isTop ? 0.32 : 0);
   return { m, y0, yaw: (i % 2) * Math.PI / 2, i };
 });
-function resize() { const w = plate.clientWidth, h = plate.clientHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.fov = pFov(30); camera.updateProjectionMatrix(); place(); }
-resize(); window.addEventListener('resize', resize);
+const _psz = new THREE.Vector2();
+function resize(force) {
+  const w = plate.clientWidth, h = plate.clientHeight; renderer.getSize(_psz);
+  if (!force && window.NARROW && Math.abs(w - _psz.x) < 1 && Math.abs(h - _psz.y) < h * 0.2) return;   // только телефон: на десктопе у этой сцены нет fitAspect, при любом изменении окна буфер пересчитываем   // resize на телефоне летит при каждом движении панели браузера — буфер не пересоздаём (setSize с теми же числами всё равно чистит канвас)
+  renderer.setSize(w, h, false); camera.aspect = w / h; camera.fov = pFov(30); camera.updateProjectionMatrix(); place();
+}
+resize(true); window.addEventListener('resize', function () { resize(false); });
 const ANIM = window.NARROW ? 1.5 : 1.4, HOLD = 0.5;                              // разбор-пауза-сбор — первые 140vh, потом 50vh пауза собранным; дальше контакты едут поверх
 function progress() { if (forced !== null) return Math.min(1, Math.max(0, parseFloat(forced))); const r = journey.getBoundingClientRect(); return Math.min(1, Math.max(0, -r.top / (ANIM * innerHeight))); }
 const smooth = (x) => x * x * (3 - 2 * x);
