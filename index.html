@@ -689,7 +689,8 @@ if (window.NARROW) {
     var from = scrollY, to = pts[i][1];
     if (Math.abs(to - from) < 2) { busy = false; return; }
     busy = true; cur = i;
-    var dist = Math.abs(to - from); dur = pts[i][2] || Math.min(2200, Math.max(1100, dist * 1.6));   // у точки может быть своя длительность t0 = performance.now();
+    var dist = Math.abs(to - from); dur = pts[i][2] || Math.min(2200, Math.max(1100, dist * 1.6));   // у точки может быть своя длительность
+    t0 = performance.now();                                                                     // ⚠️ отдельной строкой: однажды уехало в комментарий, и переезд стал прыжком
     var ease = function (t) { return -(Math.cos(Math.PI * t) - 1) / 2; };                 // синусоида: без рывка на старте и в конце
     (function step() {
       var k = Math.min(1, (performance.now() - t0) / dur);
