@@ -1,0 +1,33 @@
+name: Выкладка на Мастерхост
+
+# push в main → файлы сайта уезжают по FTP на хостинг клиента (Мастерхост, аккаунт u540228).
+# Секреты FTP_USER и FTP_PASSWORD живут в Settings → Secrets репозитория, в код не попадают.
+# Папку сайта на сервере (server-dir) задаёт переменная репозитория FTP_DIR (Settings → Variables).
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-strong
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: FTP → Мастерхост
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: u540228.ftp.masterhost.ru
+          username: ${{ secrets.FTP_USER }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./
+          server-dir: ${{ vars.FTP_DIR }}
+          dangerous-clean-slate: false          # старые файлы WordPress не трогаем, пока Юля не сделала резервную копию (см. deploy/_hosting.py)
+          exclude: |
+            **/.git*
+            **/.git*/**
+            README.md
+            .nojekyll

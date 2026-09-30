@@ -1,0 +1,36 @@
+# STRONG — настройки для Apache (Мастерхост)
+
+# 0. Главная — наш index.html, даже если рядом остался index.php от старого WordPress
+DirectoryIndex index.html index.php
+
+# 1. Принудительный HTTPS — включить (убрать #), когда сертификат на домен выпущен
+# RewriteEngine On
+# RewriteCond %{HTTPS} !=on
+# RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# 2. Кодировка и типы файлов
+AddDefaultCharset UTF-8
+AddType text/javascript .js .mjs
+AddType font/woff2 .woff2
+AddType application/json .json
+
+# 3. Сжатие (Three.js 1,2 МБ → ~300 КБ)
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css text/javascript application/javascript application/json image/svg+xml
+</IfModule>
+<IfModule mod_brotli.c>
+  AddOutputFilterByType BROTLI_COMPRESS text/html text/css text/javascript application/javascript application/json image/svg+xml
+</IfModule>
+
+# 4. Кэш: библиотеки и шрифты — на год, страница — всегда свежая
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType text/javascript "access plus 1 year"
+  ExpiresByType application/javascript "access plus 1 year"
+  ExpiresByType font/woff2 "access plus 1 year"
+  ExpiresByType text/css "access plus 1 month"
+  ExpiresByType text/html "access plus 0 seconds"
+</IfModule>
+
+# 5. Не показывать список файлов в папках
+Options -Indexes
