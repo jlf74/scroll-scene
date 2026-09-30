@@ -122,7 +122,7 @@
   .wave i{position:absolute;inset:0;background:#fff;display:block}
   /* второй заголовок и карточки направлений — внутри той же сцены */
   .final--2{color:#fff;will-change:transform,opacity;padding-top:clamp(150px,17vh,320px)}
-  @media (min-width:641px){.final--2 h2{max-width:none;white-space:nowrap}.final--2 h2 br{display:none}}   /* в одну строку, выше карточек; на телефоне перенос остаётся */   /* на высоких экранах заголовок ниже: меньше пустоты до карточек */
+  @media (min-width:901px){.final--2 h2{max-width:none;white-space:nowrap}.final--2 h2 br{display:none}}   /* в одну строку, выше карточек; на телефоне перенос остаётся */   /* на высоких экранах заголовок ниже: меньше пустоты до карточек */
   .final{will-change:transform,opacity}
   .cards{position:absolute;left:50%;bottom:20px;z-index:4;width:min(1392px, 100vw - 48px);transform:translate(-50%,0);display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;perspective:1600px;pointer-events:none}
   .cards .dir{pointer-events:auto;opacity:0;will-change:transform,opacity;transform-style:preserve-3d;position:relative}
@@ -228,10 +228,10 @@
   .mcards:empty{display:none}
   /* карточки направлений: на узком экране JS переносит их сюда из сцены — в 3D-полёте на телефоне они не читаются */
   .mcards{padding:4px 20px 48px;background:#fff}
-  @media (max-width:640px){.mcards{position:relative;z-index:5;margin-top:-80svh;padding-top:24px}   /* секция поднимается из-под низа экрана поверх сцены; к концу сцены её верх на 20% экрана */
+  @media (max-width:900px){.mcards{position:relative;z-index:5;margin-top:-80svh;padding-top:24px}   /* секция поднимается из-под низа экрана поверх сцены; к концу сцены её верх на 20% экрана */
     .mcards::before{content:'';position:absolute;left:0;right:0;bottom:calc(100% - 1px);height:18vh;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 120' preserveAspectRatio='none'%3E%3Cpath d='M0,92 C300,10 620,118 900,52 C1120,4 1320,70 1440,44 L1440,121 L0,121 Z' fill='%23fff'/%3E%3C/svg%3E") center bottom/100% 100% no-repeat}   /* волнистый верх — та же кривая, что у волны сцены */
   }
-  .mcards__h{font-family:'Unbounded',sans-serif;font-weight:800;font-size:32px;line-height:1.05;letter-spacing:-.04em;text-align:center;margin:0 0 22px;padding-top:36px}
+  .mcards__h{font-family:'Unbounded',sans-serif;font-weight:800;font-size:clamp(32px, 7.5vw, 46px);line-height:1.05;letter-spacing:-.04em;text-align:center;margin:0 0 22px;padding-top:36px}
   .mcards .cards{position:static;transform:none;width:auto;display:flex;flex-direction:column;gap:14px;perspective:none;pointer-events:auto}
   .mcards .dir{opacity:0!important;transform:perspective(1100px) rotateY(-84deg) scale(.94)!important;transform-origin:50% 50%;transition:transform .9s cubic-bezier(.2,.7,.2,1),opacity .5s;border-radius:24px;padding:12px 12px 22px}
   .mcards .dir.shown{opacity:1!important;transform:perspective(1100px) rotateY(0) scale(1)!important}   /* карточка разворачивается на месте, когда доезжает до экрана (не `.in` — это класс полей формы) */
@@ -302,7 +302,7 @@
   }
 
   /* мобильный */
-  @media (max-width:640px){
+  @media (max-width:900px){
     .top{height:64px;padding:0 20px}
     .page{padding-top:64px;--gutter:20px}
     .journey{height:430vh}          /* путь ~230vh, хвост ~100vh: заголовок гаснет, снизу со скоростью пальца поднимается секция карточек с волнистым верхом */
@@ -325,7 +325,7 @@
 
     .hero__t{position:absolute;left:20px;right:20px;top:22px;width:auto}   /* выше: под шапкой было пустое место (Юля 30.09) */
     .hero__t .eyebrow{font-size:11px;letter-spacing:.14em;margin-bottom:16px}
-    .hero__t h1{font-size:44px}
+    .hero__t h1{font-size:clamp(40px, 11vw, 60px)}   /* телефон 44px, планшет в портрете (820) — 60px */
     .hero__cos{margin-top:20px;gap:6px}
     .hero__cos span{height:34px;padding:0 12px;font-size:11px;gap:7px}
     .hero__cos i{width:8px;height:8px}
@@ -400,7 +400,7 @@
   .loader__cap{position:absolute;left:24px;bottom:24px;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--mute);font-weight:600}
   .loader__bar{position:absolute;left:0;right:0;bottom:0;height:8px;background:var(--line)}
   .loader__bar i{position:absolute;inset:0;background:linear-gradient(90deg,var(--accent) 0 25%,var(--c2) 0 50%,var(--c3) 0 75%,var(--c6) 0);clip-path:inset(0 100% 0 0)}
-  @media (max-width:640px){.loader__cap{left:20px;bottom:22px;font-size:11px}}
+  @media (max-width:900px){.loader__cap{left:20px;bottom:22px;font-size:11px}}
   @keyframes ld{0%,100%{transform:scale(1);opacity:.55}50%{transform:scale(1.5);opacity:1}}
   .hero__t>*,.hero__foot>span{opacity:0;transform:translateY(16px);transition:opacity .7s ease,transform .8s cubic-bezier(.2,.7,.2,1)}
   .hero__t>*:nth-child(2){transition-delay:.08s}.hero__t>*:nth-child(3){transition-delay:.16s}.hero__t>*:nth-child(4){transition-delay:.24s}.hero__foot>span{transition-delay:.4s}
@@ -422,7 +422,7 @@
   .mail__open{background:var(--cream);color:var(--ink)}
   .mail__form{display:inline-block;margin-top:20px;font-size:14px;color:var(--mute);text-decoration:underline}
   .mail__form:hover{color:var(--ink)}
-  @media (max-width:640px){.mail__card{padding:32px 22px 26px;border-radius:22px}.mail__addr{font-size:19px}.mail__btns .pill{width:100%}}
+  @media (max-width:900px){.mail__card{padding:32px 22px 26px;border-radius:22px}.mail__addr{font-size:19px}.mail__btns .pill{width:100%}}
 
   .ref .top,.ref .hero__t,.ref .hero__foot,.ref .ctl,.ref .note,.ref .nums,.ref .vignette{display:none!important}
   .ref .page{width:100vw}.ref .journey{height:100vh}.ref .stick{position:static;height:100vh;padding:0;min-height:0}.ref .plate{border-radius:0}
@@ -622,7 +622,7 @@
   addEventListener('resize', function () { if (Math.abs(innerWidth - last) > 40) { last = innerWidth; setVH(); } });
 })();
 /* узкий экран определяем один раз: карточки физически переезжают в DOM, поэтому менять решение на лету нельзя */
-window.NARROW = innerWidth <= 640;
+window.NARROW = innerWidth <= 900;   // граница «телефонной» раскладки поднята с 640 до 900 (Юля 30.09: планшет в портрете должен вести себя как телефон — на планшетной раскладке всё наезжало)
 if (window.NARROW) {
   var mc = document.getElementById('mcards'), f2 = document.getElementById('final2');
   var mh = document.createElement('h2'); mh.className = 'mcards__h'; mh.innerHTML = f2.querySelector('h2').innerHTML;   // заголовок — над карточками, а не в сцене
@@ -667,7 +667,7 @@ if (window.NARROW) {
 /* «Ведём по точкам» (решение Юли 29.09: в основном файле): одно движение колеса / клавиша / свайп = один шаг к следующей ключевой точке.
    Между точками страница едет сама (~0.7–1.5 с), сцена при этом проигрывается как ролик. */
 (function () {
-  var NARROW = innerWidth <= 640;
+  var NARROW = innerWidth <= 900;
   function points() {
     var H = innerHeight, j = document.getElementById('journey'), q = document.querySelector('.quote'), pr = document.getElementById('pjourney'), ct = document.querySelector('.ct'), mc = document.getElementById('mcards');
     var top = NARROW ? 64 : 84, jl = j.offsetHeight - (H - top), at = function (f) { return j.offsetTop - top + f * jl; };
@@ -928,7 +928,7 @@ const PZ = -52;
 /* фон и дымка: под каждыми воротами мир чуть подкрашивается их цветом, в конце — синий целиком */
 const cream = new THREE.Color(CREAM), blue = new THREE.Color(BLUE);
 const tint = (hex, k) => cream.clone().lerp(new THREE.Color(hex), k);
-const NARROW0 = innerWidth <= 640;
+const NARROW0 = innerWidth <= 900;
 const BG_KEYS = [                                     // синий заливает мир, пока синяя арка поднимается, через светлый синий, без серого
   [8, cream], [-6, tint(0xC87B2E, .10)], [-20, tint(0xC39433, .10)], [-32, tint(0x2E6B33, .10)], [NARROW0 ? -38 : -38, cream],
   [NARROW0 ? -46 : -42, new THREE.Color(0x7FA6C8)], [NARROW0 ? -54 : -47, blue],
@@ -1309,7 +1309,7 @@ const group = new THREE.Group(); scene.add(group);
 let spreadX = 4.6;                                        // насколько слои уезжают влево при разборе
 function place() {                                        // раскладка по ширине плашки: справа должно хватать места подписям
   const w = plate.clientWidth;
-  if (w <= 640) { group.position.set(0, -3.3, 0); group.scale.setScalar(0.62); spreadX = 0; }   // на телефоне слои по центру и ниже заголовка, подписи под ними
+  if (w <= 900) { group.position.set(0, -3.3, 0); group.scale.setScalar(0.62); spreadX = 0; }   // на телефоне слои по центру и ниже заголовка, подписи под ними
   else if (w <= 1100) { group.position.set(2.6, 0, 0); group.scale.setScalar(0.76); spreadX = 3.4; }   // планшет: правее и мельче, чтобы не лезть на заголовок
   else { group.position.set(4.6, 0, 0); group.scale.setScalar(1); spreadX = 4.6; }
 }
@@ -1361,18 +1361,18 @@ function frame() {
   cur.x += (target.x - cur.x) * 0.05; cur.y += (target.y - cur.y) * 0.05;
   group.rotation.y = 0.7 * (1 - K * 0.8) + cur.x * 0.12 + Math.sin(t * 0.3) * 0.05;   // собранный конус на три четверти, разобранный почти фронтально
   group.rotation.x = 0.18 * (1 - K) + cur.y * 0.06;
-  if (plate.clientWidth <= 640) group.scale.setScalar(0.66 * (1.45 - 0.45 * K));   // телефон: собранный конус крупный, разложенный — компактный
-  const under = plate.clientWidth <= 640;                   // подписи под слоями (телефон) или справа (десктоп)
+  if (plate.clientWidth <= 900) group.scale.setScalar(0.66 * (1.45 - 0.45 * K));   // телефон: собранный конус крупный, разложенный — компактный
+  const under = plate.clientWidth <= 900;                   // подписи под слоями (телефон) или справа (десктоп)
   const GAP = under ? 9.0 : 1.7;          // телефон: колонка почти во весь экран (Юля 30.09: «ещё больше расстояние по высоте»)          // расстояние между разведёнными слоями; на телефоне колонка на весь экран
   /* общая вертикаль подписей: правый край самого большого слоя в разобранном виде */
-  _v.set(LEN[0] * 0.5 * 0.66 + (plate.clientWidth <= 640 ? 1.1 : 1.9), 0, 0); parts[0].m.localToWorld(_v); _v.project(camera);   // зазор от синего бруса до цифры
+  _v.set(LEN[0] * 0.5 * 0.66 + (plate.clientWidth <= 900 ? 1.1 : 1.9), 0, 0); parts[0].m.localToWorld(_v); _v.project(camera);   // зазор от синего бруса до цифры
   const labelX = (_v.x * 0.5 + 0.5) * plate.clientWidth;
   parts.forEach((pt) => {
     const ki = smooth(Math.min(1, Math.max(0, (K * 1.5 - pt.i * 0.1) / 0.5)));          // очередь: нижний слой уходит первым
     pt.m.position.y = pt.y0 * (1 - ki) + (pt.i - 2.5) * GAP * ki;                    // разобранные слои стоят ровной колонкой по центру
     pt.m.rotation.y = pt.yaw * (1 - ki) + (pt.i % 2 ? 0.35 : -0.35) * ki;             // разобранные слои поворачиваются длинной стороной к зрителю
     pt.m.position.x = -ki * spreadX;                                                 // разобранные слои сдвигаются влево, освобождая место подписям
-    pt.m.scale.setScalar(1 - (plate.clientWidth <= 640 ? 0.12 : 0.34) * ki);   // на телефоне слои почти не мельчают — иначе не читаются
+    pt.m.scale.setScalar(1 - (plate.clientWidth <= 900 ? 0.12 : 0.34) * ki);   // на телефоне слои почти не мельчают — иначе не читаются
     pt.m.getWorldPosition(_v); _v.project(camera);
     const y = (-_v.y * 0.5 + 0.5) * plate.clientHeight;
     const lk = smooth(Math.min(1, Math.max(0, (ki - 0.5) / 0.4)));
