@@ -3,9 +3,9 @@
 # 0. Главная — наш index.html, даже если рядом остался index.php от старого WordPress
 DirectoryIndex index.html index.php
 
-# 1. Один адрес сайта: всегда https и без www (сертификат Let's Encrypt выпущен 30.09.2026, покрывает оба имени)
+# 1. Один адрес сайта: без www. http → https делает сам хостинг на входе; проверять %{HTTPS} здесь НЕЛЬЗЯ —
+#    за прокси Мастерхоста Apache видит соединение как http, и получается бесконечный редирект (поймано 01.10.2026)
 RewriteEngine On
-RewriteCond %{HTTPS} !=on [OR]
 RewriteCond %{HTTP_HOST} ^www\. [NC]
 RewriteRule ^ https://strongadvertising.ru%{REQUEST_URI} [L,R=301]
 
