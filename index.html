@@ -472,6 +472,14 @@
   }
 
   /* загрузка: кремовый экран с логотипом, уходит, когда шрифты и сцена готовы; обложка проявляется по частям */
+  /* уведомление о данных (плашка внизу). Выключено: сайт не ставит cookie и не грузит счётчики — показывать нечего.
+     Включается одной строкой в <script> перед разметкой (NOTICE.on = true), текст и ссылка — там же. Если решат ставить Метрику — включать обязательно. */
+  .cnote{position:fixed;left:16px;right:16px;bottom:16px;z-index:95;display:flex;align-items:center;gap:18px;max-width:720px;margin:0 auto;padding:16px 20px;border-radius:18px;background:#fff;color:var(--ink);box-shadow:0 14px 40px rgba(20,20,26,.16);font-size:14px;line-height:1.45;transform:translateY(calc(100% + 24px));transition:transform .45s cubic-bezier(.2,.7,.2,1)}
+  .cnote.on{transform:none}
+  .cnote p{margin:0;flex:1}
+  .cnote a{text-decoration:underline}
+  .cnote .pill{height:44px;padding:0 20px;font-size:14px;flex:0 0 auto}
+  @media (max-width:640px){.cnote{flex-direction:column;align-items:stretch;gap:12px;left:10px;right:10px;bottom:10px;padding:14px 16px;font-size:13px}}
   .loader{position:fixed;inset:0;z-index:100;background:var(--cream);display:flex;align-items:center;justify-content:center;transition:opacity .6s ease}
   .loader.gone{opacity:0;pointer-events:none}
   /* вариант D (выбор Юли 29.09): проценты фирменным шрифтом, приглушённые, внизу полоса четырёх цветов группы */
@@ -507,6 +515,11 @@
   .ref .page{width:100vw}.ref .journey{height:100vh}.ref .stick{position:static;height:100vh;padding:0;min-height:0}.ref .plate{border-radius:0}
 </style>
 
+<script>
+/* Уведомление о данных. По умолчанию выключено — на сайте нет cookie и счётчиков (проверено 14.10.2026), см. политику.
+   Юрист может включить: on = true; текст и адрес политики — ниже. Отметку «понятно» храним в localStorage, не в cookie. */
+window.NOTICE = { on: false, text: 'Сайт не использует cookie и счётчики. Данные, которые вы отправляете через форму, обрабатываются по <a href="#">политике обработки персональных данных</a>.', button: 'Понятно' };
+</script>
 <div class="loader" id="loader" aria-hidden="true"><span class="loader__num" id="loaderNum">0</span><span class="loader__cap">Коммуникационная группа STRONG</span><div class="loader__bar"><i id="loaderBar"></i></div></div>
 
 <div class="mail" id="mail" hidden>
@@ -651,6 +664,17 @@
   if (document.readyState === 'complete') fonts.then(ready); else addEventListener('load', function () { fonts.then(ready); });
   setTimeout(ready, 4000);                                                 // страховка: что бы ни случилось, экран не висит
   setTimeout(go, 6000);
+})();
+
+/* уведомление о данных — только если включено и ещё не закрывали */
+(function () {
+  var N = window.NOTICE; if (!N || !N.on) return;
+  try { if (localStorage.getItem('strong-notice') === '1') return; } catch (e) {}
+  var el = document.createElement('div'); el.className = 'cnote'; el.setAttribute('role', 'status');
+  el.innerHTML = '<p>' + N.text + '</p><button class="pill pill--ink" type="button">' + N.button + '</button>';
+  document.body.appendChild(el);
+  setTimeout(function () { el.classList.add('on'); }, 1600);
+  el.querySelector('button').addEventListener('click', function () { el.classList.remove('on'); try { localStorage.setItem('strong-notice', '1'); } catch (e) {} setTimeout(function () { el.remove(); }, 500); });
 })();
 
 /* письмо: окошко с адресом, копирование, запасные пути */
