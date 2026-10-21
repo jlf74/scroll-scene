@@ -445,6 +445,7 @@
     .pr__head{position:absolute;left:20px;right:20px;top:64px;transform:none;max-width:none;text-align:center}
     .pr__head h2{font-size:32px}
     .pr__head .sub{font-size:14px;margin-top:14px;max-width:none}
+    .pr__head .sub span{display:block}
     .pr__lbl{font-size:16px;white-space:nowrap;max-width:none;gap:8px;line-height:1.16;transform:translate(-50%,0);justify-content:center;text-align:center}
     .pr__lbl small{font-size:10px}
 
@@ -603,7 +604,7 @@ window.NOTICE = { on: false, text: 'Сайт не использует cookie и
   <section class="tail" id="pjourney">
     <div class="pr__stick"><div class="pr__plate" id="pplate"><div class="pr__in" id="prin">
       <canvas id="pgl"></canvas>
-      <div class="pr__head"><p class="eyebrow">Как мы работаем</p><h2>Принципы</h2><p class="sub">Шесть слоёв одной конструкции. Уберите любой — она не устоит.</p></div>
+      <div class="pr__head"><p class="eyebrow">Как мы работаем</p><h2>Принципы</h2><p class="sub"><span>Шесть слоёв одной конструкции.</span> <span>Уберите любой — она не устоит.</span></p></div>
       <div class="pr__lbl" style="color:var(--accent)"><small>01</small>Честность</div>
       <div class="pr__lbl" style="color:var(--c2)"><small>02</small>Долгосрочное сотрудничество</div>
       <div class="pr__lbl" style="color:var(--c3)"><small>03</small>Эффективность</div>
@@ -1410,7 +1411,7 @@ const group = new THREE.Group(); scene.add(group);
 let spreadX = 4.6;                                        // насколько слои уезжают влево при разборе
 function place() {                                        // раскладка по ширине плашки: справа должно хватать места подписям
   const w = plate.clientWidth;
-  if (w <= 900) { group.position.set(0, -3.3, 0); group.scale.setScalar(0.62); spreadX = 0; }   // на телефоне слои по центру и ниже заголовка, подписи под ними
+  if (w <= 900) { group.position.set(0, -6.3, 0); group.scale.setScalar(0.62); spreadX = 0; }   // мобильная колонка ниже текста, включая верхний слой при раскрытии; подписи следуют за слоями
   else if (w <= 1100) { group.position.set(2.6, 0, 0); group.scale.setScalar(0.76); spreadX = 3.4; }   // планшет: правее и мельче, чтобы не лезть на заголовок
   else { group.position.set(4.6, 0, 0); group.scale.setScalar(1); spreadX = 4.6; }
 }
