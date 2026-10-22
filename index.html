@@ -519,7 +519,7 @@
 <script>
 /* Уведомление о данных. По умолчанию выключено — на сайте нет cookie и счётчиков (проверено 14.10.2026), см. политику.
    Юрист может включить: on = true; текст и адрес политики — ниже. Отметку «понятно» храним в localStorage, не в cookie. */
-window.NOTICE = { on: false, text: 'Сайт не использует cookie и счётчики. Данные, которые вы отправляете через форму, обрабатываются по <a href="#">политике обработки персональных данных</a>.', button: 'Понятно' };
+window.NOTICE = { on: false, text: 'Сайт не использует cookie и счётчики. Данные, которые вы отправляете через форму, обрабатываются по <a href="/policy/">политике обработки персональных данных</a>.', button: 'Понятно' };
 </script>
 <div class="loader" id="loader" aria-hidden="true"><span class="loader__num" id="loaderNum">0</span><span class="loader__cap">Коммуникационная группа STRONG</span><div class="loader__bar"><i id="loaderBar"></i></div></div>
 
@@ -626,7 +626,7 @@ window.NOTICE = { on: false, text: 'Сайт не использует cookie и
       <input class="in" type="email" name="email" placeholder="Эл. почта" required autocomplete="email">
       <textarea class="in" name="message" placeholder="Сообщение" required></textarea>
       <input type="text" name="site" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">   <!-- ловушка для ботов: люди это поле не видят -->
-      <label class="consent"><input type="checkbox" name="consent" required><span>Нажимая «Отправить», я соглашаюсь с <a href="#">политикой обработки персональных данных</a></span></label>
+      <label class="consent"><input type="checkbox" name="consent" required><span>Даю <a href="/consent/" target="_blank" rel="noopener">согласие на обработку персональных данных</a> и подтверждаю ознакомление с <a href="/policy/" target="_blank" rel="noopener">политикой обработки персональных данных</a></span></label>
       <button class="pill" type="submit">Отправить</button>
       <p class="ct__note" id="ctNote" role="status" aria-live="polite" hidden></p>
     </form>
@@ -634,7 +634,7 @@ window.NOTICE = { on: false, text: 'Сайт не использует cookie и
 
   <footer class="foot">
     <div class="foot__l"><span class="u">STRONG</span><span>Коммуникационная группа · member of igronik group</span></div>
-    <div class="foot__c"><a href="#">Политика обработки персональных данных</a><span>© 2026 STRONG</span></div>
+    <div class="foot__c"><a href="/policy/">Политика обработки персональных данных</a><span>© 2026 STRONG</span></div>
     <a class="foot__dev" href="#">Разработка сайта<svg class="ext" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 9L9 3M9 3H4.2M9 3v4.8" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
   </footer>
   </section>
